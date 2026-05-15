@@ -15,7 +15,6 @@ const tabs: DtTab[] = [
   { key: 'preview', label: 'Preview' },
   { key: 'code', label: 'Code' },
 ]
-const variantsTab = ref('preview')
 const sizesTab = ref('preview')
 const labelTab = ref('preview')
 const statesTab = ref('preview')
@@ -28,9 +27,6 @@ const search = ref('')
 const phone = ref<PhoneValue>({ e164: '', country: 'UZ', national: '' })
 const card = ref('')
 const brand = ref<CardBrand>('unknown')
-
-const variantsCode = `<DtInput v-model="text" variant="primary"   label="Primary" />
-<DtInput v-model="text" variant="secondary" label="Secondary" />`
 
 const sizesCode = `<DtInput v-model="text" size="sm" label="Small" />
 <DtInput v-model="text" size="md" label="Medium" />
@@ -99,7 +95,6 @@ const propsCols: DtColumn[] = [
 const inputProps = [
   { name: 'modelValue',    type: 'string | number',                          default: '—',         desc: 'v-model.' },
   { name: 'type',          type: 'string',                                   default: "'text'",    desc: 'Native input type.' },
-  { name: 'variant',       type: "'primary' | 'secondary'",                  default: "'primary'", desc: 'Visual style.' },
   { name: 'size',          type: "'sm' | 'md' | 'lg' | 'xl'",                default: "'md'",      desc: 'Height: 48 / 56 / 64 / 72 px.' },
   { name: 'label',         type: 'string',                                   default: '—',         desc: 'Label text.' },
   { name: 'labelPosition', type: "'top' | 'floating'",                       default: "'top'",     desc: 'External label or inset floating label.' },
@@ -148,16 +143,6 @@ const paymentEvents = [
 
       <h2>Install</h2>
       <CodeBlock :code="installSnippet" lang="bash" />
-
-      <h2>Variants</h2>
-      <DtTabSwitcher v-model="variantsTab" :tabs="tabs" />
-      <div class="dx-tab-panel">
-        <div v-if="variantsTab === 'preview'" class="dx-preview dx-preview--column">
-          <DtInput v-model="text" variant="primary"   label="Primary"   placeholder="White, bordered" />
-          <DtInput v-model="text" variant="secondary" label="Secondary" placeholder="Filled, borderless" />
-        </div>
-        <CodeBlock v-else :code="variantsCode" lang="vue" />
-      </div>
 
       <h2>Sizes</h2>
       <DtTabSwitcher v-model="sizesTab" :tabs="tabs" />

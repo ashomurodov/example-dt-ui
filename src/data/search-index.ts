@@ -35,6 +35,7 @@ const seeds: SearchSeed[] = [
   // Data Display
   { titleKey: 'nav.card',           descKey: 'search.descriptions.card',           group: 'Data Display', to: '/components/card',        keywords: 'container section panel header content footer' },
   { titleKey: 'nav.badge',          descKey: 'search.descriptions.badge',          group: 'Data Display', to: '/components/badge',       keywords: 'tag pill chip count color indicator' },
+  { titleKey: 'nav.badgeGroup',     descKey: 'search.descriptions.badgeGroup',     group: 'Data Display', to: '/components/badge-group', keywords: 'announcement banner release notice callout pill modern' },
   { titleKey: 'nav.avatar',         descKey: 'search.descriptions.avatar',         group: 'Data Display', to: '/components/avatar',      keywords: 'profile user image initials photo group label status online offline' },
   { titleKey: 'nav.statusBadge',    descKey: 'search.descriptions.statusBadge',    group: 'Data Display', to: '/components/status-badge', keywords: 'pill state active inactive moderation rejected' },
   { titleKey: 'nav.dataTable',      descKey: 'search.descriptions.dataTable',      group: 'Data Display', to: '/components/data-table',  keywords: 'table list grid columns rows striped loading empty' },

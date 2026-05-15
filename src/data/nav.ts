@@ -35,6 +35,7 @@ export function useSidebarNav() {
       items: [
         { key: 'c-card', to: '/components/card', label: t('nav.card') },
         { key: 'c-badge', to: '/components/badge', label: t('nav.badge') },
+        { key: 'c-badge-group', to: '/components/badge-group', label: t('nav.badgeGroup') },
         { key: 'c-avatar', to: '/components/avatar', label: t('nav.avatar') },
         { key: 'c-status-badge', to: '/components/status-badge', label: t('nav.statusBadge') },
         { key: 'c-data-table', to: '/components/data-table', label: t('nav.dataTable') },

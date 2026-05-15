@@ -45,6 +45,7 @@ const COMPONENTS = [
   // Data Display
   { slug: 'card', title: 'DtCard', group: 'Data Display' },
   { slug: 'badge', title: 'DtBadge', group: 'Data Display' },
+  { slug: 'badge-group', title: 'DtBadgeGroup', group: 'Data Display' },
   { slug: 'avatar', title: 'DtAvatar', group: 'Data Display' },
   { slug: 'status-badge', title: 'DtStatusBadge', group: 'Data Display' },
   { slug: 'data-table', title: 'DtDataTable', group: 'Data Display' },

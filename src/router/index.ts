@@ -20,6 +20,7 @@ const routes: RouteRecordRaw[] = [
   // Components — Data Display
   { path: '/components/card', name: 'card', component: () => import('@/views/components/CardView.vue') },
   { path: '/components/badge', name: 'badge', component: () => import('@/views/components/BadgeView.vue') },
+  { path: '/components/badge-group', name: 'badge-group', component: () => import('@/views/components/BadgeGroupView.vue') },
   { path: '/components/avatar', name: 'avatar', component: () => import('@/views/components/AvatarView.vue') },
   { path: '/components/status-badge', name: 'status-badge', component: () => import('@/views/components/StatusBadgeView.vue') },
   { path: '/components/data-table', name: 'data-table', component: () => import('@/views/components/DataTableView.vue') },
