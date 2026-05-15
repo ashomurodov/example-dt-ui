@@ -1,0 +1,2273 @@
+# DT UI — Component Reference
+
+This project uses dt-ui components. Below is the complete API reference for all installed components. Components use pure CSS with CSS custom properties for theming. No Tailwind or CSS framework required.
+
+## Theming
+
+All components use CSS custom properties prefixed with `--dt-` defined in `base.css`. Override them in your project's CSS to customize the look.
+
+### Key Tokens
+
+| Token | Default (Light) | Description |
+|-------|-----------------|-------------|
+| `--dt-color-accent` | `#0096b2` | Brand/primary color |
+| `--dt-color-accent-hover` | `#007a91` | Primary hover state |
+| `--dt-color-accent-foreground` | `#ffffff` | Text on primary bg |
+| `--dt-color-text` | `#131720` | Main text color |
+| `--dt-color-text-secondary` | `#667085` | Secondary text |
+| `--dt-color-background` | `#ffffff` | Page background |
+| `--dt-color-background-tertiary` | `#f0f2f5` | Tertiary surface |
+| `--dt-color-border` | `#dde1e9` | Border color |
+| `--dt-color-error` | `#ef4444` | Error/destructive color |
+| `--dt-color-success` | `#16a34a` | Success color |
+| `--dt-color-warning` | `#eab308` | Warning color (yellow) |
+| `--dt-color-ring` | `#0096b2` | Focus ring color |
+| `--dt-radius-xs` | `6px` | Small radius (badges) |
+| `--dt-radius-md` | `12px` | Base radius (inputs, buttons) |
+| `--dt-radius-lg` | `16px` | Large radius (cards, rows) |
+| `--dt-font-family` | `'Lab Grotesque', system-ui` | Font family |
+
+### Dark Mode
+
+Set `data-theme="dark"` on `<html>`. All tokens automatically adjust.
+
+---
+
+## Components
+
+# DtLayout
+
+A complete application shell layout system with header, sidebar, modules modal, profile modal, page view, and divider components. Provides the standard DT platform layout: sticky header, sidebar navigation (desktop) / bottom nav (mobile), and a centered content area.
+
+## Import
+
+```ts
+import {
+  DtLayout,
+  DtLayoutHeader,
+  DtLayoutSidebar,
+  DtModulesModal,
+  DtProfileModal,
+  DtPageView,
+  DtDivider,
+} from '@/components/ui/layout'
+
+import type {
+  DtModuleClickPayload,
+  DtModuleItem,
+  DtNavItem,
+  DtNavSection,
+  DtUser,
+  DtProfileMenuItem,
+} from '@/components/ui/layout'
+```
+
+## Components
+
+### DtLayout
+
+The root shell. Uses CSS Grid to position sidebar and content side-by-side on desktop, stacked on mobile.
+
+#### Slots
+
+| Slot | Description |
+| ------ | ------------- |
+| `header` | Place `DtLayoutHeader` here. Renders in a sticky header area. |
+| `sidebar` | Place `DtLayoutSidebar` here. Desktop: sticky sidebar. Mobile: fixed bottom nav. |
+| `default` | Page content (`<router-view />`). |
+| `footer` | Optional footer, rendered after the main grid. |
+
+---
+
+### DtLayoutHeader
+
+Pre-styled header with logo area, badge, module switcher button, and profile avatar button. Height: 84px desktop, 76px mobile.
+
+#### Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `badge` | `string` | `undefined` | Badge text displayed next to the logo (e.g., "Specialist", "Cabinet"). |
+| `profileName` | `string` | `undefined` | Used to generate avatar initials when no image is provided. |
+| `profileAvatar` | `string` | `undefined` | URL for the profile avatar image. Falls back to initials. |
+| `activeModule` | `string` | `'cabinet'` | Current module key. Highlights the matching item in the modules modal. |
+| `envMode` | `'dev' \| 'preprod' \| 'prod'` | `'dev'` | Legacy compatibility prop. The built-in modal does not use it. |
+| `showModulesButton` | `boolean` | `true` | Whether to show the grid modules button. |
+| `modules` | `DtModuleItem[]` | `[]` | Items shown in the built-in modules modal. |
+| `modulesTitle` | `string` | `'Modules'` | Optional modal title. |
+| `modulesDescription` | `string` | `''` | Optional modal description. |
+| `modulesCloseLabel` | `string` | `'Close modules'` | Accessible label for the close button. |
+
+#### Events
+
+| Event | Payload | Description |
+| ------- | --------- | ------------- |
+| `toggle-profile` | — | Emitted when the profile avatar button is clicked. |
+| `modules-click` | `MouseEvent` | Emitted when the modules button is clicked. |
+| `module-click` | `DtModuleClickPayload` | Emitted when a module item is clicked. |
+
+#### Modules Modal (Built-in)
+
+The header opens `DtModulesModal` automatically when `modules` has visible items. No CDN script is required.
+
+```ts
+interface DtModuleItem {
+  key: string
+  label: string
+  href?: string
+  logo?: string
+  icon?: any
+  badge?: string | number
+  description?: string
+  target?: '_self' | '_blank' | '_parent' | '_top'
+  rel?: string
+  active?: boolean
+  disabled?: boolean
+  hidden?: boolean
+  span?: 'default' | 'full'
+  onClick?: (payload: DtModuleClickPayload) => void | Promise<void>
+}
+```
+
+Use `href` for normal navigation, `onClick` for app-owned behavior, `logo` for image URLs, or `icon` for Vue icon components. The app owns module URLs, auth checks, and any custom routing. Call `payload.event.preventDefault()` in `@module-click` when you need to stop a link.
+
+#### Slots
+
+| Slot | Description |
+| ------ | ------------- |
+| `logo` | Logo content (e.g., `<RouterLink to="/"><LogoIcon /></RouterLink>`). |
+| `actions` | Extra action buttons between the modules button and profile button. |
+| `profile-dropdown` | Place `DtProfileModal` here for the profile dropdown. |
+
+---
+
+### DtLayoutSidebar
+
+Config-driven sidebar navigation. Desktop: sticky scrollable sidebar with collapsible sections. Mobile: fixed bottom nav showing first N items.
+
+#### Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `items` | `DtNavItem[]` | **required** | Main navigation items. |
+| `sections` | `DtNavSection[]` | `[]` | Optional collapsible grouped sections below the main items. |
+| `mobileItems` | `number` | `5` | Number of items visible in the mobile bottom nav. |
+
+#### Types
+
+```ts
+interface DtNavItem {
+  to: string          // Route path
+  icon?: Component    // SVG icon component
+  label: string       // Display text
+}
+
+interface DtNavSection {
+  title: string       // Section header (uppercase, small text)
+  items: DtNavItem[]  // Sub-navigation items
+  collapsible?: boolean // Default true — adds expand/collapse chevron
+}
+```
+
+#### Slots
+
+| Slot | Description |
+| ------ | ------------- |
+| `desktop-extra` | Extra content at the bottom of the desktop sidebar. |
+| `mobile-extra` | Extra items in the mobile bottom nav. |
+
+#### Features
+
+- Active route highlighting via Vue Router's `router-link-active` class.
+- Collapsible sections with animated chevron (90° rotation) and slide transition.
+- Desktop: 246px wide, sticky, hidden scrollbar, max-height to viewport.
+- Mobile (≤1024px): Fixed bottom bar, horizontal layout, first N items shown.
+
+---
+
+### DtProfileModal
+
+Fully self-contained profile dropdown with user info, theme switcher, language picker, and logout. All labels are built-in with i18n in 3 languages (uz/ru/en). Theme options (light/dark/system) and locale options (uz/ru/en) are hardcoded — no configuration needed.
+
+#### Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `modelValue` | `boolean` | **required** | Controls visibility. Use with `v-model`. |
+| `user` | `DtUser` | **required** | User object. The component extracts name, initials, phone, and avatar automatically. |
+| `locale` | `'uz' \| 'ru' \| 'en'` | `'uz'` | Current language. Controls which built-in translations are shown. |
+| `theme` | `'light' \| 'dark' \| 'system'` | `'light'` | Current theme. Controls which radio button is selected. |
+| `menuItems` | `DtProfileMenuItem[]` | `[]` | Optional extra menu items specific to the module. |
+| `isOrganization` | `boolean` | `false` | If true, displays `user.organization_name` instead of personal name. |
+| `profileUrl` | `string` | `undefined` | URL for the "Profile" link (opens in new tab). If not set, profile link is hidden. |
+| `resourceUrl` | `string` | `undefined` | Base URL for file resources (e.g., `https://resource.dthub.uz/api/file/view-image`). Prepended to `user.logo_url` to build the full avatar URL. |
+
+#### DtUser Interface
+
+```ts
+interface DtUser {
+  first_name: string
+  last_name: string
+  middle_name?: string
+  logo_url?: string
+  phone_numbers?: { number: string }[]
+  organization_name?: string
+}
+```
+
+#### DtProfileMenuItem Interface
+
+```ts
+interface DtProfileMenuItem {
+  key: string        // Unique identifier
+  label: string      // Display text
+  icon?: Component   // Optional icon component
+  href?: string      // If set, opens URL in new tab instead of emitting
+}
+```
+
+#### Events
+
+| Event | Payload | Description |
+| ------- | --------- | ------------- |
+| `update:modelValue` | `boolean` | Controls open/close state. |
+| `theme-change` | `'light' \| 'dark' \| 'system'` | Emitted when a theme option is selected. |
+| `locale-change` | `'uz' \| 'ru' \| 'en'` | Emitted when a language option is selected. |
+| `logout` | — | Emitted when logout is clicked. |
+| `menu-click` | `string` | Emitted when a custom menu item is clicked (receives the item's `key`). |
+
+#### Slots
+
+| Slot | Description |
+| ------ | ------------- |
+| `menu-extra` | Extra `<li>` items injected into the built-in menu (between language and logout). |
+
+#### Built-in Features
+
+- **3 animated views**: Main → Appearance / Language (slide transitions, 250ms).
+- **Built-in i18n**: Labels for "Appearance", "Language", "Logout", theme names in uz/ru/en.
+- **Hardcoded options**: Theme (light/dark/system), locale (O'zbekcha/Русский/English).
+- **Auto-computed**: Display name, initials, phone number from the `user` object.
+- **Close behavior**: Click outside, Escape key, close button.
+- **Radio buttons**: Animated dot pop (scale 0 → 1.2 → 1, 200ms).
+
+---
+
+### DtPageView
+
+A centered page content container with optional title. Max-width defaults to 1100px. Responsive padding.
+
+#### Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `title` | `string` | `undefined` | Page heading (32px, bold). |
+| `maxWidth` | `string` | `'1100px'` | CSS max-width for the content area. |
+
+#### Slots
+
+| Slot | Description |
+| ------ | ------------- |
+| `title` | Custom title content (replaces the `title` prop heading). |
+| `default` | Page content. |
+
+---
+
+### DtDivider
+
+A 1px horizontal line separator.
+
+#### Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `spacing` | `string` | `'16px'` | Bottom margin. |
+
+---
+
+## Full Example: Complete App Shell
+
+```vue
+<script setup lang="ts">
+import {
+  DtLayout, DtLayoutHeader, DtLayoutSidebar,
+  DtProfileModal, DtPageView, DtDivider,
+} from '@/components/ui/layout'
+import type { DtModuleItem, DtNavItem } from '@/components/ui/layout'
+
+import LogoIcon from '@/assets/icons/logo.svg'
+import ServicesIcon from '@/assets/icons/services.svg'
+import DocsIcon from '@/assets/icons/docs.svg'
+import ReportsIcon from '@/assets/icons/reports.svg'
+
+const store = useUserStore()
+const { theme, setTheme } = useTheme()
+const { locale, setLang } = useLangStorage()
+
+const showProfile = ref(false)
+
+const navItems: DtNavItem[] = [
+  { to: '/services', icon: ServicesIcon, label: 'Services' },
+  { to: '/documents', icon: DocsIcon, label: 'Documents' },
+  { to: '/reports', icon: ReportsIcon, label: 'Reports' },
+]
+
+const modules: DtModuleItem[] = [
+  { key: 'cabinet', label: 'Cabinet', icon: LogoIcon, href: 'https://id.dthub.uz/cabinet', span: 'full' },
+  { key: 'services', label: 'Services', icon: ServicesIcon, href: '/services' },
+  { key: 'documents', label: 'Documents', icon: DocsIcon, href: '/documents' },
+  { key: 'reports', label: 'Reports', icon: ReportsIcon, href: '/reports' },
+]
+</script>
+
+<template>
+  <DtLayout>
+    <template #header>
+      <DtLayoutHeader
+        badge="Specialist"
+        :profile-name="store.user?.first_name + ' ' + store.user?.last_name"
+        :profile-avatar="store.user?.logo_url"
+        active-module="cabinet"
+        :modules="modules"
+        @toggle-profile="showProfile = !showProfile"
+      >
+        <template #logo>
+          <RouterLink to="/"><LogoIcon /></RouterLink>
+        </template>
+        <template #profile-dropdown>
+          <DtProfileModal
+            v-model="showProfile"
+            :user="store.user"
+            :locale="locale"
+            :theme="theme"
+            :is-organization="store.isOrganization"
+            profile-url="https://id.dthub.uz/cabinet"
+            resource-url="https://resource.dthub.uz/api/file/view-image"
+            @theme-change="setTheme"
+            @locale-change="setLang"
+            @logout="store.logout()"
+          />
+        </template>
+      </DtLayoutHeader>
+    </template>
+
+    <template #sidebar>
+      <DtLayoutSidebar :items="navItems" :mobile-items="4" />
+    </template>
+
+    <router-view />
+  </DtLayout>
+</template>
+```
+
+## CSS Custom Properties
+
+All layout components use `--dt-*` tokens from `base.css`. Key tokens:
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-sidebar-width` | Sidebar minimum width (240px). |
+| `--dt-color-background` | Sidebar and header background. |
+| `--dt-color-background-secondary` | Nav link hover background. |
+| `--dt-color-background-tertiary` | Active nav link background. |
+| `--dt-color-border` | Header button borders. |
+| `--dt-color-border-light` | Sidebar divider, mobile top border. |
+| `--dt-color-icon` | Nav item icon color. |
+| `--dt-color-icon-dark` | Header button and profile modal icon color. |
+| `--dt-color-accent` | Header button hover border, modal accent. |
+| `--dt-color-surface` | Profile modal background. |
+| `--dt-color-surface-hover` | Menu item hover, active theme option. |
+| `--dt-color-divider` | Profile modal section dividers. |
+| `--dt-radius-lg` | Nav link and profile modal border-radius (16px). |
+| `--dt-radius-sm` | Menu item and option border-radius (9px). |
+| `--dt-shadow-lg` | Profile modal shadow. |
+
+## Responsive Breakpoints
+
+| Breakpoint | Behavior |
+| ----------- | ---------- |
+| > 1024px | Sidebar: sticky left column. Header: 84px. |
+| ≤ 1024px | Sidebar: fixed bottom nav. Header: 76px. Content: 80px bottom padding. |
+| ≤ 768px | DtPageView: reduced padding, smaller title. |
+
+---
+
+# DtSearchToolbar
+
+A horizontal toolbar with a search input and an optional action button. Designed for use at the top of list/table views. Contains built-in search and plus icons (no external icon dependencies). Responsive — stacks vertically on mobile.
+
+## Import
+
+```ts
+import { DtSearchToolbar } from '@/components/ui/search-toolbar'
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `search` | `string` | `''` | The search input value. Use with `v-model:search`. |
+| `searchPlaceholder` | `string` | `undefined` | Placeholder text for the search input. |
+| `addLabel` | `string` | `undefined` | Label for the action button. If not provided, the button is hidden. |
+
+## Events
+
+| Event | Payload | Description |
+| ------- | --------- | ------------- |
+| `update:search` | `string` | Emitted on every input keystroke (v-model). |
+| `search` | — | Emitted on each input event. Use this to trigger debounced fetching. |
+| `add` | — | Emitted when the action button is clicked. |
+
+## Usage Examples
+
+### Basic Search + Add
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { DtSearchToolbar } from '@/components/ui/search-toolbar'
+
+const search = ref('')
+
+let timer: ReturnType<typeof setTimeout> | null = null
+const handleSearch = () => {
+  if (timer) clearTimeout(timer)
+  timer = setTimeout(() => fetchData(), 400)
+}
+</script>
+
+<template>
+  <DtSearchToolbar
+    v-model:search="search"
+    search-placeholder="Search"
+    add-label="Add"
+    @search="handleSearch"
+    @add="router.push('/create')"
+  />
+</template>
+```
+
+### Search Only (no button)
+
+```vue
+<DtSearchToolbar v-model:search="search" search-placeholder="Filter..." @search="handleSearch" />
+```
+
+## CSS Custom Properties
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-color-border` | Search input border. |
+| `--dt-color-background` | Search input background. |
+| `--dt-color-text` | Search input text. |
+| `--dt-color-text-tertiary` | Placeholder and search icon color. |
+| `--dt-color-accent` | Action button background and search input focus border. |
+| `--dt-color-accent-hover` | Action button hover background. |
+| `--dt-radius-lg` | Search input border-radius (16px). |
+| `--dt-radius-md` | Action button border-radius (12px). |
+| `--dt-text-body-sm` | Font size (14px). |
+| `--dt-spacing-xl` | Gap between search and button; input left padding. |
+| `--dt-spacing-md` | Button icon-to-label gap. |
+| `--dt-transition-fast` | Focus/hover transitions. |
+
+## Responsive Behavior
+
+Below 768px:
+
+- Toolbar stacks vertically (`flex-direction: column`).
+- Search input becomes full width.
+- Action button centers its content.
+
+---
+
+# DtTabSwitcher
+
+An animated tab bar component with a sliding indicator that uses the FLIP animation technique for smooth, GPU-accelerated transitions. Designed for status filtering in list views but works for any tab-based UI. Supports optional badge counts per tab.
+
+## Import
+
+```ts
+import { DtTabSwitcher } from '@/components/ui/tab-switcher'
+import type { DtTab } from '@/components/ui/tab-switcher'
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `tabs` | `DtTab[]` | **required** | Array of tab definitions. |
+| `modelValue` | `string` | **required** | The `key` of the currently active tab. Use with `v-model`. |
+
+### DtTab Interface
+
+```ts
+interface DtTab {
+  key: string       // Unique identifier
+  label: string     // Display text
+  badge?: string    // Optional badge (e.g., count) shown after the label
+}
+```
+
+## Events
+
+| Event | Payload | Description |
+| ------- | --------- | ------------- |
+| `update:modelValue` | `string` | Emitted when a tab is clicked. |
+
+## Usage Examples
+
+### Status Filter Tabs
+
+```vue
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+import { DtTabSwitcher } from '@/components/ui/tab-switcher'
+import type { DtTab } from '@/components/ui/tab-switcher'
+
+const activeTab = ref('all')
+
+const tabs = computed<DtTab[]>(() => [
+  { key: 'all', label: 'All' },
+  { key: 'active', label: 'Published' },
+  { key: 'inactive', label: 'Inactive' },
+  { key: 'moderation', label: 'In moderation' },
+  { key: 'rejected', label: 'Rejected' },
+  { key: 'blocked', label: 'Blocked' },
+])
+</script>
+
+<template>
+  <DtTabSwitcher v-model="activeTab" :tabs="tabs" />
+</template>
+```
+
+### Tabs with Badge
+
+```vue
+<script setup lang="ts">
+const tabs = [
+  { key: 'inbox', label: 'Inbox', badge: '12' },
+  { key: 'sent', label: 'Sent' },
+  { key: 'drafts', label: 'Drafts', badge: '3' },
+]
+</script>
+
+<template>
+  <DtTabSwitcher v-model="activeTab" :tabs="tabs" />
+</template>
+```
+
+## CSS Custom Properties
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-color-background-tertiary` | Tab bar background. |
+| `--dt-color-icon-dark` | Active indicator background (#3f4c5d). |
+| `--dt-color-text-secondary` | Inactive tab text color. |
+| `--dt-color-text` | Inactive tab hover text color. |
+| `--dt-color-error-light` | Badge background (inactive). |
+| `--dt-color-error` | Badge text color (inactive) and badge background (active). |
+| `--dt-radius-md` | Tab bar border-radius (12px). |
+| `--dt-radius-sm` | Indicator and tab pill border-radius (9px). |
+| `--dt-radius-xs` | Badge border-radius (6px). |
+| `--dt-text-body-sm` | Tab text font size (14px). |
+| `--dt-transition-fast` | Tab text color transition. |
+
+## Animation Details
+
+The indicator uses the **FLIP technique** (First, Last, Invert, Play):
+
+1. Reads the current visual position via `getBoundingClientRect()` (works even mid-transition).
+2. Snaps the indicator to the new target position instantly.
+3. Applies a `transform: translateX() scaleX()` to make it appear at the old position.
+4. Animates `transform` back to identity — this runs entirely on the GPU compositor.
+5. Uses `cubic-bezier(0.4, 0, 0.2, 1)` easing over 300ms.
+
+A `ResizeObserver` re-syncs the indicator on container resize (e.g., window resize, sidebar toggle).
+
+---
+
+# DtPagination
+
+Page navigation with prev/next arrows, numbered page buttons, and smart ellipsis. Supports two visual hierarchies (primary/secondary) and 3 sizes. Shows a stable 5-page window with first/last page always visible. Automatically hides on single page.
+
+## Import
+
+```ts
+import { DtPagination } from '@/components/ui/pagination'
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `page` | `number` | **required** | Current active page (1-based). Use with `v-model:page`. |
+| `totalCount` | `number` | **required** | Total number of items across all pages. |
+| `pageSize` | `number` | `10` | Number of items per page. |
+| `variant` | `'primary' \| 'secondary'` | `'secondary'` | Visual hierarchy. |
+| `size` | `'lg' \| 'md' \| 'sm'` | `'md'` | Button size. |
+
+## Events
+
+| Event | Payload | Description |
+| ------- | --------- | ------------- |
+| `update:page` | `number` | Emitted when a page button or arrow is clicked. |
+
+## Page Window Behavior
+
+The pagination shows a stable 5-page window with ellipsis for large page counts:
+
+| Position | Display |
+| ---------- | --------- |
+| ≤7 total pages | All pages shown, no ellipsis |
+| Near start (page 1–4) | **1 2 3 4 5** ... 50 |
+| Middle (page 16) | 1 ... 14 15 **16** 17 18 ... 50 |
+| Near end (page 47–50) | 1 ... **46 47 48 49 50** |
+
+The first 5 pages remain as a stable block — no pages appear or disappear one by one when clicking through the first few pages.
+
+## Variants
+
+### Secondary (default)
+- Bordered buttons (`--dt-color-border`)
+- Active: dark fill (`--dt-gray-800`), white text
+- Hover: gray background (`--dt-gray-100`)
+- Disabled: gray fill, muted text
+
+### Primary
+- No border
+- Active: accent fill (`--dt-color-accent`), white text
+- Hover: gray background
+- Disabled: gray fill, muted text
+
+## Sizes
+
+| Size | Height | Border Radius |
+| ------ | -------- | --------------- |
+| `lg` | 40px | 8px |
+| `md` | 36px | 8px |
+| `sm` | 32px | 4px |
+
+## Usage
+
+```vue
+<!-- Few pages — all visible -->
+<DtPagination v-model:page="page" :total-count="25" />
+
+<!-- Secondary (bordered, dark active) — default -->
+<DtPagination v-model:page="page" :total-count="500" />
+
+<!-- Primary (accent active) -->
+<DtPagination v-model:page="page" :total-count="500" variant="primary" />
+
+<!-- Small size -->
+<DtPagination v-model:page="page" :total-count="500" size="sm" />
+
+<!-- Large, primary -->
+<DtPagination v-model:page="page" :total-count="500" variant="primary" size="lg" />
+```
+
+## CSS Custom Properties
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-gray-100` | Hover and disabled background. |
+| `--dt-gray-300` | Disabled text color. |
+| `--dt-gray-400` | Ellipsis color. |
+| `--dt-gray-500` | Default text/icon color. |
+| `--dt-gray-800` | Hover text, secondary active fill. |
+| `--dt-color-accent` | Primary active fill. |
+| `--dt-color-background` | Button default background. |
+| `--dt-color-border` | Secondary button border. |
+| `--dt-radius-sm` | LG/MD button radius (8px). |
+| `--dt-radius-xxs` | SM button radius (4px). |
+| `--dt-text-body-sm` | Page number font size. |
+| `--dt-spacing-3xl` | Top margin. |
+
+---
+
+# DtDataTable
+
+A data table component driven by column configuration and slot-based cell rendering. Supports loading state, empty state, pagination-aware row indexing, mobile-responsive column hiding, and optional zebra-striped rows. Renders a native `<table>` element with separated row borders and rounded corners.
+
+## Import
+
+```ts
+import { DtDataTable } from '@/components/ui/data-table'
+import type { DtColumn } from '@/components/ui/data-table'
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `columns` | `DtColumn[]` | **required** | Array of column definitions controlling header labels, widths, alignment, and mobile visibility. |
+| `items` | `unknown[]` | **required** | Array of data objects to render as rows. |
+| `loading` | `boolean` | `false` | Shows a centered spinner instead of rows. |
+| `emptyText` | `string` | `undefined` | Text displayed when `items` is empty and not loading. |
+| `page` | `number` | `1` | Current page number, used to calculate `rowIndex` in slots. |
+| `pageSize` | `number` | `10` | Items per page, used to calculate `rowIndex` in slots. |
+| `striped` | `boolean` | `false` | Enables alternating row backgrounds (white / `--dt-color-background-tertiary`). |
+
+### DtColumn Interface
+
+```ts
+interface DtColumn {
+  key: string           // Unique column identifier, also used as slot name
+  label: string         // Header text
+  width?: string        // CSS width (e.g., '40px', '35%', '150px')
+  align?: 'left' | 'right' | 'center'  // Text alignment for header and cells
+  hideOnMobile?: boolean // Hides column below 768px
+}
+```
+
+## Slots
+
+Each column `key` becomes a named slot for custom cell rendering:
+
+| Slot | Props | Description |
+| ------ | ------- | ------------- |
+| `[column.key]` | `{ item: any, index: number, rowIndex: number }` | Custom cell content. `index` is 0-based within the page, `rowIndex` is the absolute row number across all pages. Falls back to `item[column.key]` if slot is not provided. |
+
+## Usage Examples
+
+### Basic Table
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { DtDataTable } from '@/components/ui/data-table'
+import type { DtColumn } from '@/components/ui/data-table'
+
+const columns: DtColumn[] = [
+  { key: 'no', label: 'No', width: '40px', align: 'right' },
+  { key: 'title', label: 'Name', width: '40%' },
+  { key: 'price', label: 'Price', width: '150px', hideOnMobile: true },
+  { key: 'actions', label: 'Actions', align: 'right' },
+]
+
+const items = ref([
+  { title: 'Service A', price: 50000 },
+  { title: 'Service B', price: 120000 },
+])
+</script>
+
+<template>
+  <DtDataTable :columns="columns" :items="items" :page="1" :page-size="10" empty-text="No items found">
+    <template #no="{ rowIndex }">{{ rowIndex }}</template>
+    <template #title="{ item }">{{ item.title }}</template>
+    <template #price="{ item }">{{ item.price.toLocaleString() }} UZS</template>
+    <template #actions="{ item }">
+      <button @click="edit(item)">Edit</button>
+    </template>
+  </DtDataTable>
+</template>
+```
+
+### Striped Table (for reports)
+
+```vue
+<DtDataTable :columns="columns" :items="items" striped />
+```
+
+### Composed with Pagination
+
+```vue
+<script setup lang="ts">
+import { DtDataTable } from '@/components/ui/data-table'
+import { DtPagination } from '@/components/ui/pagination'
+
+const page = ref(1)
+const totalCount = ref(100)
+</script>
+
+<template>
+  <DtDataTable :columns="columns" :items="items" :page="page" :page-size="10" :loading="loading" />
+  <DtPagination v-model:page="page" :total-count="totalCount" :page-size="10" />
+</template>
+```
+
+## CSS Custom Properties
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-color-icon-secondary` | Table header text color. |
+| `--dt-color-text` | Cell text color. |
+| `--dt-color-background` | Default row background. |
+| `--dt-color-background-secondary` | Row hover background. |
+| `--dt-color-background-tertiary` | Striped even-row background. |
+| `--dt-color-text-tertiary` | Empty state / loading text color. |
+| `--dt-color-border-light` | Spinner border color. |
+| `--dt-color-accent` | Spinner top-border color. |
+| `--dt-radius-lg` | Row corner radius (16px). |
+| `--dt-text-body-xs` | Cell font size (12px). |
+| `--dt-text-body-sm` | Empty state font size (14px). |
+| `--dt-transition-fast` | Row hover transition. |
+
+---
+
+# DtDialog
+
+A Reka UI backed modal dialog with DT styling. It keeps the existing compound API (`DtDialog`, `DtDialogTrigger`, `DtDialogContent`, `DtDialogHeader`, `DtDialogFooter`) while delegating modal behavior, focus trapping, Escape dismissal, outside interaction handling, scroll locking, and screen-reader hiding to `reka-ui`.
+
+## Dependency
+
+This component imports primitives from `reka-ui`. The `dt-ui` CLI installs `reka-ui@2.9.6` when you run:
+
+```bash
+npx dt-ui add dialog
+```
+
+`dialog` still depends on `button` internally for the examples and common usage patterns.
+
+## Import
+
+```ts
+import {
+  DtDialog,
+  DtDialogTrigger,
+  DtDialogContent,
+  DtDialogHeader,
+  DtDialogFooter,
+} from '@/components/ui/dialog'
+```
+
+## Usage
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import {
+  DtDialog,
+  DtDialogTrigger,
+  DtDialogContent,
+  DtDialogHeader,
+  DtDialogFooter,
+} from '@/components/ui/dialog'
+import { DtButton } from '@/components/ui/button'
+
+const open = ref(false)
+</script>
+
+<template>
+  <DtDialog v-model="open">
+    <DtDialogTrigger>
+      <DtButton>Open Dialog</DtButton>
+    </DtDialogTrigger>
+
+    <DtDialogContent>
+      <DtDialogHeader>
+        <h2>Confirm Action</h2>
+        <p>Are you sure you want to continue?</p>
+      </DtDialogHeader>
+
+      <DtDialogFooter>
+        <DtButton variant="outline" @click="open = false">Cancel</DtButton>
+        <DtButton @click="open = false">Confirm</DtButton>
+      </DtDialogFooter>
+    </DtDialogContent>
+  </DtDialog>
+</template>
+```
+
+## DtDialog Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `modelValue` | `boolean` | `undefined` | Controlled open state. Use with `v-model`. |
+| `defaultOpen` | `boolean` | `false` | Initial uncontrolled open state. |
+| `modal` | `boolean` | `true` | Whether outside content should be inert while open. |
+
+## Slot Props
+
+The default slot receives helpers for custom triggers or programmatic control.
+
+| Slot Prop | Type | Description |
+| ----------- | ------ | ------------- |
+| `open` | `boolean` | Current open state. |
+| `toggle` | `() => void` | Toggles the dialog. |
+| `close` | `() => void` | Closes the dialog. |
+| `openDialog` | `() => void` | Opens the dialog. |
+
+## DtDialogTrigger
+
+Wraps Reka `DialogTrigger`. By default `asChild` is `true`, which lets common usage like `<DtDialogTrigger><DtButton>Open</DtButton></DtDialogTrigger>` merge trigger behavior directly onto the button and avoid nested buttons.
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `asChild` | `boolean` | `true` | Merge trigger behavior into the slotted child. Set to `false` to render a native trigger button. |
+
+## DtDialogContent
+
+Renders a Reka `DialogPortal`, `DialogOverlay`, and `DialogContent`. The content is centered with DT styling and animated using Reka's `data-state` attributes.
+
+## DtDialogHeader and DtDialogFooter
+
+These remain visual layout helpers. Use heading and paragraph content in the header, and action buttons in the footer.
+
+## Events
+
+| Event | Payload | Description |
+| ------- | --------- | ------------- |
+| `update:modelValue` | `boolean` | Emitted when open state changes. |
+
+## Accessibility
+
+Reka UI provides `role="dialog"`, `aria-modal`, focus trapping, Escape key handling, outside click dismissal, body scroll lock through the overlay, and focus restoration to the trigger. For best screen-reader announcements, provide a clear heading in `DtDialogHeader`; future versions may expose dedicated `DtDialogTitle` and `DtDialogDescription` wrappers if teams need stricter title/description wiring.
+
+---
+
+# DtButton
+
+A clickable button component with four variants, eight sizes, and loading + disabled states. Renders a native `<button>` element and forwards all attributes via `$attrs`, so native events like `click`, `focus`, and `blur` work without any special binding.
+
+## Import
+
+```ts
+import { DtButton } from '@/components/ui/button'
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `variant` | `ButtonVariant` | `'default'` | Visual style of the button. |
+| `size` | `ButtonSize` | `'md'` | Controls height, padding, radius, and font size. |
+| `disabled` | `boolean` | `false` | Disables the button (sets native `disabled` attribute). |
+| `loading` | `boolean` | `false` | Shows a spinner and disables interaction. The native `disabled` attribute is also set while loading. |
+
+### Type Reference
+
+```ts
+type ButtonVariant = 'default' | 'outline' | 'transparent' | 'secondary-grey'
+type ButtonSize = '3xl' | '2xl' | 'xl' | 'lg' | 'md' | 'sm' | 'xs' | '2xs'
+```
+
+### Variant Behavior
+
+| Variant | Background | Text | Border | Notes |
+| --------- | ----------- | ------ | -------- | ------- |
+| `default` | `--dt-color-accent` | `--dt-color-white` | same as bg | Primary call-to-action. |
+| `outline` | `--dt-color-background` | `--dt-gray-800` | `--dt-color-border` | Neutral bordered button. Active state shifts to accent. |
+| `transparent` | transparent | `--dt-color-accent` | none | No background until hover; hover fills `--dt-brand-100`. |
+| `secondary-grey` | `--dt-gray-500` | `--dt-color-white` | same as bg | Lower-emphasis solid alternative to `default`. |
+
+### Size Reference
+
+| Size | Height | Padding-x | Border Radius | Font Size | Icon |
+| ------ | -------- | ----------- | --------------- | ----------- | ------ |
+| `3xl` | 60px | `--dt-spacing-4xl` (32px) | `--dt-radius-xl` (20px) | `--dt-text-body-md` | 20px |
+| `2xl` | 56px | `--dt-spacing-3xl` (24px) | `--dt-radius-lg` (16px) | `--dt-text-body-md` | 20px |
+| `xl` | 48px | `--dt-spacing-3xl` (24px) | `--dt-radius-lg` (16px) | `--dt-text-body-md` | 20px |
+| `lg` | 44px | `--dt-spacing-2xl` (20px) | `--dt-radius-md` (12px) | `--dt-text-body-md` | 20px |
+| `md` | 40px | `--dt-spacing-2xl` (20px) | `--dt-radius-md` (12px) | `--dt-text-body-sm` | 16px |
+| `sm` | 36px | `--dt-spacing-xl` (16px) | `--dt-radius-md` (12px) | `--dt-text-body-sm` | 16px |
+| `xs` | 32px | `--dt-spacing-xl` (16px) | `--dt-radius-sm` (8px) | `--dt-text-body-sm` | 16px |
+| `2xs` | 24px | `--dt-spacing-lg` (12px) | `--dt-radius-xs` (6px) | `--dt-text-body-xs` | 14px |
+
+## Slots
+
+| Slot | Description |
+| ------ | ------------- |
+| `default` | Button label text or content. |
+| `icon-left` | Icon rendered before the label. Wrapped in a flex-aligned, fixed-size container per the size scale. |
+| `icon-right` | Icon rendered after the label. Wrapped in a flex-aligned, fixed-size container per the size scale. |
+
+## Events
+
+DtButton does not define custom events. All native `<button>` events are forwarded through `v-bind="$attrs"`:
+
+- `click` — Fired on click. Not fired when `disabled` or `loading` is true (native `disabled` prevents it).
+- `focus` — Fired when the button receives focus.
+- `blur` — Fired when focus leaves the button.
+
+## Usage Examples
+
+### Basic Button
+
+```vue
+<script setup lang="ts">
+import { DtButton } from '@/components/ui/button'
+
+function handleClick() {
+  console.log('clicked')
+}
+</script>
+
+<template>
+  <DtButton @click="handleClick">Save Changes</DtButton>
+</template>
+```
+
+### Button Variants and Sizes
+
+```vue
+<script setup lang="ts">
+import { DtButton } from '@/components/ui/button'
+</script>
+
+<template>
+  <div style="display: flex; gap: 0.5rem; align-items: center;">
+    <DtButton variant="default">Default</DtButton>
+    <DtButton variant="outline">Outline</DtButton>
+    <DtButton variant="transparent">Transparent</DtButton>
+    <DtButton variant="secondary-grey">Secondary Grey</DtButton>
+  </div>
+
+  <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 1rem;">
+    <DtButton size="3xl">3XL</DtButton>
+    <DtButton size="2xl">2XL</DtButton>
+    <DtButton size="xl">XL</DtButton>
+    <DtButton size="lg">LG</DtButton>
+    <DtButton size="md">MD</DtButton>
+    <DtButton size="sm">SM</DtButton>
+    <DtButton size="xs">XS</DtButton>
+    <DtButton size="2xs">2XS</DtButton>
+  </div>
+</template>
+```
+
+### Loading State with Icons
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { Plus } from 'lucide-vue-next'
+import { DtButton } from '@/components/ui/button'
+
+const saving = ref(false)
+
+async function save() {
+  saving.value = true
+  await new Promise(r => setTimeout(r, 2000))
+  saving.value = false
+}
+</script>
+
+<template>
+  <DtButton variant="outline" :disabled="saving">Cancel</DtButton>
+  <DtButton :loading="saving" @click="save">
+    <template #icon-left>
+      <Plus :size="18" />
+    </template>
+    Save
+  </DtButton>
+</template>
+```
+
+## CSS Custom Properties
+
+The following design tokens are used by DtButton and can be overridden to theme the component:
+
+### Colors
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-color-accent` | Default variant background; transparent variant text. |
+| `--dt-color-accent-hover` | Default variant hover background. |
+| `--dt-color-accent-active` | Default variant active background. |
+| `--dt-color-white` | Default and secondary-grey variant text. |
+| `--dt-gray-500` | Secondary-grey background and border. |
+| `--dt-gray-700` | Secondary-grey hover background and border. |
+| `--dt-gray-600` | Secondary-grey active background and border. |
+| `--dt-gray-800` | Outline variant text. |
+| `--dt-color-background` | Outline variant background. |
+| `--dt-color-background-secondary` | Outline variant hover background. |
+| `--dt-color-border` | Outline variant border. |
+| `--dt-color-border-hover` | Outline variant hover border. |
+| `--dt-brand-100` | Outline active and transparent hover background. |
+| `--dt-color-disabled-bg` | Disabled background and border. |
+| `--dt-color-disabled-text` | Disabled text. |
+| `--dt-color-ring` | Focus-visible outer ring color. |
+
+### Layout & Typography
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-spacing-md` | Default gap between icon slots and label (4px for `2xs`). |
+| `--dt-spacing-lg` … `--dt-spacing-4xl` | Per-size horizontal padding. |
+| `--dt-radius-xs` … `--dt-radius-xl` | Per-size border radius. |
+| `--dt-radius-full` | Spinner border-radius. |
+| `--dt-text-body-xs` / `--dt-text-body-sm` / `--dt-text-body-md` | Per-size font size. |
+| `--dt-leading-body-xs` / `--dt-leading-body-sm` / `--dt-leading-body-md` | Per-size line height. |
+| `--dt-font-medium` | Button font weight. |
+| `--dt-transition-base` | Duration/easing for background, border, and color transitions. |
+
+## Accessibility
+
+- Uses a native `<button>` element, so it is keyboard-focusable and activatable with Enter/Space by default.
+- The `disabled` attribute is set natively when `disabled` or `loading` is true, which removes the button from the tab order and prevents activation.
+- A visible `:focus-visible` ring is drawn as a 2px outer ring at `--dt-color-ring`, offset 5px outside the button, with radius one step larger than the button itself.
+- The loading spinner is marked `aria-hidden="true"` to avoid screen readers announcing decorative content.
+- When using an icon-only button (no visible text label), pass an `aria-label` attribute to give the button an accessible name.
+- Color contrast for all variant/foreground combinations should be verified against WCAG 2.1 AA (4.5:1 for text, 3:1 for UI components).
+
+---
+
+# DtCard
+
+A container component for grouping related content into a visually distinct section. Uses a compound component pattern with `DtCardHeader`, `DtCardContent`, and `DtCardFooter` sub-components that can be composed freely inside `DtCard`.
+
+## Import
+
+```ts
+import { DtCard, DtCardHeader, DtCardContent, DtCardFooter } from '@/components/ui/card'
+```
+
+## Components
+
+### DtCard
+
+The root container. Renders a `<div>` with background, border-radius, and optional border, shadow, and padding.
+
+#### Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `bordered` | `boolean` | `true` | Adds a 1px solid border using `--dt-color-border`. |
+| `shadow` | `boolean` | `false` | Applies a medium box-shadow (`--dt-shadow-md`). |
+| `padding` | `boolean` | `true` | Applies `--dt-spacing-3xl` (1.5rem) padding to the card. |
+
+#### Slots
+
+| Slot | Description |
+| ------ | ------------- |
+| `default` | Card body content. Typically contains `DtCardHeader`, `DtCardContent`, and `DtCardFooter` sub-components but can hold any content. |
+
+### DtCardHeader
+
+A header section that renders a flex column with a small gap. Applies default styles to heading elements (`h1`-`h4`: bold, tight line-height) and paragraphs (`p`: muted color, small font size) via `:deep()` selectors.
+
+#### Props
+
+None. Attributes are forwarded via `$attrs`.
+
+#### Slots
+
+| Slot | Description |
+| ------ | ------------- |
+| `default` | Header content. Typically a heading and an optional description paragraph. |
+
+### DtCardContent
+
+A simple body wrapper. Applies base font size and foreground color.
+
+#### Props
+
+None. Attributes are forwarded via `$attrs`.
+
+#### Slots
+
+| Slot | Description |
+| ------ | ------------- |
+| `default` | Main card body content. |
+
+### DtCardFooter
+
+A footer section with horizontal flex layout and gap for action elements.
+
+#### Props
+
+None. Attributes are forwarded via `$attrs`.
+
+#### Slots
+
+| Slot | Description |
+| ------ | ------------- |
+| `default` | Footer content. Typically buttons or links. |
+
+## Events
+
+None of the card components emit custom events. Native events are forwarded through `$attrs` on each root element.
+
+## Usage Examples
+
+### Basic Card
+
+```vue
+<script setup lang="ts">
+import { DtCard, DtCardHeader, DtCardContent } from '@/components/ui/card'
+</script>
+
+<template>
+  <DtCard>
+    <DtCardHeader>
+      <h3>Notifications</h3>
+      <p>You have 3 unread messages.</p>
+    </DtCardHeader>
+    <DtCardContent>
+      <p>Your recent activity will appear here.</p>
+    </DtCardContent>
+  </DtCard>
+</template>
+```
+
+### Card Variants (shadow, no border, no padding)
+
+```vue
+<script setup lang="ts">
+import { DtCard, DtCardHeader, DtCardContent } from '@/components/ui/card'
+</script>
+
+<template>
+  <!-- Elevated card with shadow, no border -->
+  <DtCard :bordered="false" :shadow="true">
+    <DtCardHeader>
+      <h3>Elevated Card</h3>
+    </DtCardHeader>
+    <DtCardContent>
+      <p>This card uses a shadow instead of a border for visual separation.</p>
+    </DtCardContent>
+  </DtCard>
+
+  <!-- Minimal card, no padding -->
+  <DtCard :padding="false">
+    <img src="/banner.jpg" alt="Banner" style="width: 100%;" />
+    <div style="padding: 1.5rem;">
+      <h3>Full-bleed Image</h3>
+      <p>Removing padding lets content like images extend to the edges.</p>
+    </div>
+  </DtCard>
+</template>
+```
+
+### Composed with DtButton and DtBadge
+
+```vue
+<script setup lang="ts">
+import { DtCard, DtCardHeader, DtCardContent, DtCardFooter } from '@/components/ui/card'
+import { DtButton } from '@/components/ui/button'
+import { DtBadge } from '@/components/ui/badge'
+</script>
+
+<template>
+  <DtCard :shadow="true" style="max-width: 24rem;">
+    <DtCardHeader>
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <h3>Pro Plan</h3>
+        <DtBadge variant="success">Active</DtBadge>
+      </div>
+      <p>Your subscription renews on April 1, 2026.</p>
+    </DtCardHeader>
+    <DtCardContent>
+      <p>50 GB storage, unlimited collaborators, priority support.</p>
+    </DtCardContent>
+    <DtCardFooter>
+      <DtButton variant="outline">Manage</DtButton>
+      <DtButton variant="destructive">Cancel Plan</DtButton>
+    </DtCardFooter>
+  </DtCard>
+</template>
+```
+
+## CSS Custom Properties
+
+### DtCard
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-color-background` | Card background color. |
+| `--dt-color-border` | Border color (when `bordered` is true). |
+| `--dt-radius-lg` | Card border-radius. |
+| `--dt-shadow-md` | Box-shadow (when `shadow` is true). |
+| `--dt-spacing-3xl` | Padding (when `padding` is true). |
+
+### DtCardHeader
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-spacing-xs` | Vertical gap between heading and description. |
+| `--dt-spacing-xl` | Bottom padding separating the header from subsequent content. |
+| `--dt-color-text` | Heading text color. |
+| `--dt-color-text-secondary` | Description paragraph text color. |
+| `--dt-text-body-sm` | Description paragraph font size. |
+
+### DtCardContent
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-color-text` | Text color. |
+| `--dt-text-body-md` | Font size. |
+
+### DtCardFooter
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-spacing-md` | Horizontal gap between footer items. |
+| `--dt-spacing-xl` | Top padding separating the footer from preceding content. |
+
+## Accessibility
+
+- DtCard renders a plain `<div>`, which is semantically neutral. If the card represents a distinct section of the page, consider adding `role="region"` and an `aria-labelledby` attribute pointing to the heading id inside `DtCardHeader`.
+- All sub-components forward `$attrs`, so you can add any ARIA attributes directly (e.g., `aria-label`, `role`).
+- Heading levels inside `DtCardHeader` should follow the document outline. Do not skip heading levels (e.g., jumping from `h2` to `h4`).
+- The card uses `overflow: hidden`, which clips content visually. Ensure interactive elements near the edges are not accidentally clipped or made unreachable.
+- When cards are used in a list or grid, consider wrapping them in a `<ul>` / `<li>` structure or adding `role="list"` / `role="listitem"` for better screen reader navigation.
+
+---
+
+# DtStatusBadge
+
+A color-coded status pill component for displaying entity states like active, inactive, moderation, etc. Uses semantic colors from the design token system — green for active, gray for inactive, orange for moderation, red for rejected/canceled/blocked.
+
+## Import
+
+```ts
+import { DtStatusBadge } from '@/components/ui/status-badge'
+import type { StatusVariant } from '@/components/ui/status-badge'
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `variant` | `StatusVariant` | **required** | The status type, determining background and text color. |
+
+### StatusVariant Type
+
+```ts
+type StatusVariant = 'active' | 'inactive' | 'moderation' | 'canceled' | 'rejected' | 'blocked'
+```
+
+### Variant Colors
+
+| Variant | Background | Text Color | Use Case |
+| --------- | ----------- | ------------ | ---------- |
+| `active` | `--dt-color-success-light` | `--dt-color-success` | Published, approved, enabled |
+| `inactive` | `--dt-color-background-tertiary` | `--dt-color-text-tertiary` | Draft, disabled, unpublished |
+| `moderation` | `--dt-color-warning-light` | `--dt-color-warning` | Pending review |
+| `canceled` | `--dt-color-error-light` | `--dt-color-error` | Canceled by user |
+| `rejected` | `--dt-color-error-light` | `--dt-color-error` | Rejected by moderator |
+| `blocked` | `--dt-color-error-light` | `--dt-color-error` | Blocked by admin |
+
+## Slots
+
+| Slot | Description |
+| ------ | ------------- |
+| `default` | Status label text. |
+
+## Usage Examples
+
+### Basic Usage
+
+```vue
+<script setup lang="ts">
+import { DtStatusBadge } from '@/components/ui/status-badge'
+</script>
+
+<template>
+  <DtStatusBadge variant="active">Published</DtStatusBadge>
+  <DtStatusBadge variant="moderation">In review</DtStatusBadge>
+  <DtStatusBadge variant="rejected">Rejected</DtStatusBadge>
+</template>
+```
+
+### Inside a DataTable
+
+```vue
+<template #status="{ item }">
+  <DtStatusBadge :variant="statusVariantMap[item.status] ?? 'inactive'">
+    {{ statusLabelMap[item.status] ?? 'Pending' }}
+  </DtStatusBadge>
+</template>
+```
+
+### Dynamic Status Mapping Pattern
+
+```ts
+const STATUS = { ACTIVE: 1, INACTIVE: 0, MODERATION: 3, REJECTED: 4, BLOCKED: 2 } as const
+
+const statusVariantMap: Record<number, StatusVariant> = {
+  [STATUS.ACTIVE]: 'active',
+  [STATUS.INACTIVE]: 'inactive',
+  [STATUS.MODERATION]: 'moderation',
+  [STATUS.REJECTED]: 'rejected',
+  [STATUS.BLOCKED]: 'blocked',
+}
+```
+
+## CSS Custom Properties
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-color-success-light` | Active variant background. |
+| `--dt-color-success` | Active variant text. |
+| `--dt-color-background-tertiary` | Inactive variant background. |
+| `--dt-color-text-tertiary` | Inactive variant text. |
+| `--dt-color-warning-light` | Moderation variant background. |
+| `--dt-color-warning` | Moderation variant text. |
+| `--dt-color-error-light` | Canceled/rejected/blocked variant background. |
+| `--dt-color-error` | Canceled/rejected/blocked variant text. |
+| `--dt-radius-xs` | Badge border-radius (6px). |
+| `--dt-text-body-xs` | Badge font size (12px). |
+
+---
+
+# DtBadge
+
+A small inline status indicator for labeling, categorizing, or highlighting information. Renders as a `<span>` with pill-shaped border-radius and supports multiple color variants, two sizes, and an optional status dot.
+
+## Import
+
+```ts
+import { DtBadge } from '@/components/ui/badge'
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `variant` | `BadgeVariant` | `'default'` | Color variant controlling background, text, and border colors. |
+| `size` | `BadgeSize` | `'default'` | Controls padding and font size. |
+| `dot` | `boolean` | `false` | Renders a small circular dot before the badge text, using `currentColor`. Useful as a status indicator. |
+
+### Type Reference
+
+```ts
+type BadgeVariant = 'default' | 'secondary' | 'outline' | 'destructive' | 'success' | 'warning'
+type BadgeSize = 'sm' | 'default'
+```
+
+### Variant Behavior
+
+| Variant | Background | Text Color | Border |
+| --------- | ----------- | ------------ | -------- |
+| `default` | `--dt-color-accent` | `--dt-color-accent-foreground` | transparent |
+| `secondary` | `--dt-color-secondary` | `--dt-color-secondary-foreground` | transparent |
+| `outline` | transparent | `--dt-color-text` | `--dt-color-border` |
+| `destructive` | `--dt-color-error` | `--dt-color-error-foreground` | transparent |
+| `success` | `--dt-color-success` | `--dt-color-success-foreground` | transparent |
+| `warning` | `--dt-color-warning` | `--dt-color-warning-foreground` | transparent |
+
+### Size Reference
+
+| Size | Padding | Font Size |
+| ------ | --------- | ----------- |
+| `sm` | 0.125rem 0.375rem | `--dt-text-body-xs` |
+| `default` | 0.25rem 0.5rem | `--dt-text-body-xs` |
+
+## Slots
+
+| Slot | Description |
+| ------ | ------------- |
+| `default` | Badge text content. |
+
+## Events
+
+DtBadge does not emit custom events. Native events are forwarded through `v-bind="$attrs"`.
+
+## Usage Examples
+
+### Basic Badge
+
+```vue
+<script setup lang="ts">
+import { DtBadge } from '@/components/ui/badge'
+</script>
+
+<template>
+  <DtBadge>New</DtBadge>
+</template>
+```
+
+### All Variants and Sizes
+
+```vue
+<script setup lang="ts">
+import { DtBadge } from '@/components/ui/badge'
+</script>
+
+<template>
+  <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+    <DtBadge variant="default">Default</DtBadge>
+    <DtBadge variant="secondary">Secondary</DtBadge>
+    <DtBadge variant="outline">Outline</DtBadge>
+    <DtBadge variant="destructive">Error</DtBadge>
+    <DtBadge variant="success">Active</DtBadge>
+    <DtBadge variant="warning">Pending</DtBadge>
+  </div>
+
+  <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 1rem;">
+    <DtBadge size="sm">Small</DtBadge>
+    <DtBadge size="default">Default</DtBadge>
+  </div>
+
+  <!-- With dot indicator -->
+  <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 1rem;">
+    <DtBadge variant="success" :dot="true">Online</DtBadge>
+    <DtBadge variant="destructive" :dot="true">Offline</DtBadge>
+    <DtBadge variant="warning" :dot="true">Away</DtBadge>
+  </div>
+</template>
+```
+
+### Composed with DtCard for a Status Dashboard
+
+```vue
+<script setup lang="ts">
+import { DtBadge } from '@/components/ui/badge'
+import { DtCard, DtCardHeader, DtCardContent } from '@/components/ui/card'
+
+const services = [
+  { name: 'API Server', status: 'success' as const, label: 'Operational' },
+  { name: 'Database', status: 'warning' as const, label: 'Degraded' },
+  { name: 'CDN', status: 'destructive' as const, label: 'Down' },
+]
+</script>
+
+<template>
+  <DtCard>
+    <DtCardHeader>
+      <h3>Service Status</h3>
+    </DtCardHeader>
+    <DtCardContent>
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <div
+          v-for="service in services"
+          :key="service.name"
+          style="display: flex; align-items: center; justify-content: space-between;"
+        >
+          <span>{{ service.name }}</span>
+          <DtBadge :variant="service.status" :dot="true" size="sm">
+            {{ service.label }}
+          </DtBadge>
+        </div>
+      </div>
+    </DtCardContent>
+  </DtCard>
+</template>
+```
+
+## CSS Custom Properties
+
+### Colors
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-color-accent` | Default variant background. |
+| `--dt-color-accent-foreground` | Default variant text. |
+| `--dt-color-secondary` | Secondary variant background. |
+| `--dt-color-secondary-foreground` | Secondary variant text. |
+| `--dt-color-text` | Outline variant text. |
+| `--dt-color-border` | Outline variant border. |
+| `--dt-color-error` | Destructive variant background. |
+| `--dt-color-error-foreground` | Destructive variant text. |
+| `--dt-color-success` | Success variant background. |
+| `--dt-color-success-foreground` | Success variant text. |
+| `--dt-color-warning` | Warning variant background. |
+| `--dt-color-warning-foreground` | Warning variant text. |
+
+### Layout & Typography
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-spacing-xs` | Gap between the dot and the text. |
+| `--dt-radius-full` | Pill-shaped border-radius (9999px). Also used for the dot circle. |
+| `--dt-text-body-xs` | Font size at `sm` size. |
+| `--dt-text-body-sm` | Font size at `default` size. |
+| `--dt-transition-base` | Duration/easing for background-color and color transitions. |
+
+## Accessibility
+
+- DtBadge renders a `<span>`, which is inline and does not convey any semantic meaning by default. If the badge represents a status that is important for the user to understand, pair it with visible text or provide an `aria-label` on a parent element.
+- The dot element is marked with `aria-hidden="true"` because it is purely decorative; its meaning should be conveyed by the badge text.
+- Color alone should not be the only way to communicate status. Always include descriptive text inside the badge (e.g., "Active" instead of just a green dot).
+- When using badges inside interactive elements (such as a table row), ensure the badge text is included in the accessible name or description of that element so screen reader users understand the status.
+- Verify that variant foreground/background combinations meet WCAG 2.1 AA contrast requirements (4.5:1 for the badge text).
+
+---
+
+# DtAvatar
+
+Circular avatar with image, initials, or user-icon fallback. Six sizes (24/32/40/48/56/64px), an optional outer ring, and an optional status indicator at the bottom-right corner.
+
+The package exports four related components:
+
+- **`DtAvatar`** — the base avatar.
+- **`DtAvatarLabel`** — avatar + name + flexible description (email, phone, link, anything).
+- **`DtAvatarGroup`** — stacked avatars with overlap, optional `+N` overflow, optional add button.
+- **`DtAvatarAdd`** — standalone dashed "+" button for the "invite member" pattern (three sizes, hover / focus / disabled states).
+
+## Import
+
+```ts
+import { DtAvatar, DtAvatarLabel, DtAvatarGroup, DtAvatarAdd } from '@/components/ui/avatar'
+```
+
+## DtAvatar props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `src` | `string` | — | Image URL. Falls back to initials/icon if missing or fails to load. |
+| `alt` | `string` | — | Alt text for the image. Defaults to `name` if not provided. |
+| `name` | `string` | — | Full name; initials derived from first two words. |
+| `initials` | `string` | — | Explicit 1–2 character override. |
+| `size` | `AvatarSize` | `'md'` | Box size — `xs` (24) / `sm` (32) / `md` (40) / `lg` (48) / `xl` (56) / `2xl` (64). |
+| `bordered` | `boolean` | `false` | Outer 1px ring with a 2px breathing gap. |
+| `status` | `AvatarStatus \| null` | `null` | `'online'` (green dot) or `'offline'` (gray dot). Overridden by `#status` slot. |
+
+```ts
+type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'
+type AvatarStatus = 'online' | 'offline'
+```
+
+### Fallback hierarchy
+
+1. If `src` is set and loads successfully → render `<img>`.
+2. Else if `initials` is set → render those characters.
+3. Else if `name` is set → derive initials (first letter of the first two words) and render.
+4. Else → render the built-in user icon.
+
+If an image fails to load (`onerror`), the component falls back automatically.
+
+## Slots
+
+| Slot | Description |
+| ------ | ------------- |
+| `status` | Custom status indicator content (brand icon, verified badge, count, etc.). Overrides the `status` prop visual. The avatar handles position, size, and the white halo against the avatar edge — the slot fills the wrapper. |
+
+## Examples
+
+### Image, initials, icon fallback
+
+```vue
+<DtAvatar src="/avatars/mardon.jpg" name="Mardon Shonazarov" />
+<DtAvatar name="Mardon Shonazarov" />     <!-- "MS" -->
+<DtAvatar initials="DT" />
+<DtAvatar />                              <!-- user icon -->
+```
+
+### Online / offline dot
+
+```vue
+<DtAvatar src="/me.jpg" status="online" />
+<DtAvatar src="/me.jpg" status="offline" />
+```
+
+### Custom status indicator (anything)
+
+The `#status` slot lets you drop in any element — brand icons, a verified badge, a count, an `<img>`, or your own SVG. The wrapper takes care of positioning and the white halo.
+
+```vue
+<!-- Brand icon (any icon library, here lucide-vue-next) -->
+<DtAvatar src="/me.jpg">
+  <template #status>
+    <Send :size="12" color="#3b82f6" fill="#3b82f6" />
+  </template>
+</DtAvatar>
+
+<!-- Numeric count badge -->
+<DtAvatar src="/me.jpg">
+  <template #status>
+    <span class="my-count">8</span>
+  </template>
+</DtAvatar>
+
+<!-- Verified checkmark -->
+<DtAvatar src="/me.jpg">
+  <template #status>
+    <svg viewBox="0 0 16 16">…</svg>
+  </template>
+</DtAvatar>
+```
+
+### Bordered
+
+```vue
+<DtAvatar src="/me.jpg" bordered />
+```
+
+## DtAvatarLabel
+
+Horizontal `Avatar + name + description` composition. The description is **fully flexible** — it accepts a `description` prop for the simple text case, or a `#description` slot for anything else (email link, multiple lines, badges, phone number).
+
+### Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `name` | `string` | **required** | Primary text. Rendered bold. |
+| `description` | `string` | — | Secondary text. Skip when using the `#description` slot. |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Maps to avatar size 32 / 40 / 48 and matching typography. |
+| `src` / `alt` / `initials` / `status` / `bordered` | — | — | Forwarded to the default `DtAvatar`. Skip when using the `#avatar` slot. |
+
+### Slots
+
+| Slot | Description |
+| ------ | ------------- |
+| `avatar` | Override the default avatar entirely. Receives the resolved `size` as a slot prop. |
+| `description` | Custom secondary content — links, multiple lines, badges, mixed text and icons. |
+
+### Examples
+
+```vue
+<!-- Simplest — single name -->
+<DtAvatarLabel name="Mardon Shonazarov" />
+
+<!-- Name + secondary text -->
+<DtAvatarLabel
+  name="Mardon Shonazarov"
+  description="mardon.shonazarov@gmail.com"
+  src="/avatars/mardon.jpg"
+  size="md"
+/>
+
+<!-- Phone number instead of email -->
+<DtAvatarLabel
+  name="Mardon Shonazarov"
+  description="+998 90 123 45 67"
+  src="/avatars/mardon.jpg"
+/>
+
+<!-- Linked email via slot -->
+<DtAvatarLabel name="Mardon Shonazarov" src="/me.jpg">
+  <template #description>
+    <a href="mailto:mardon@example.com">mardon@example.com</a>
+  </template>
+</DtAvatarLabel>
+
+<!-- Avatar with status, custom description -->
+<DtAvatarLabel name="Mardon Shonazarov" status="online" src="/me.jpg" size="lg">
+  <template #description>
+    <span style="color: var(--dt-color-success);">Active now</span>
+  </template>
+</DtAvatarLabel>
+
+<!-- Fully custom avatar (e.g. with a brand-icon status) -->
+<DtAvatarLabel name="Mardon Shonazarov" description="Telegram: @mardon">
+  <template #avatar="{ size }">
+    <DtAvatar :size="size" src="/me.jpg">
+      <template #status>
+        <svg viewBox="0 0 16 16">…telegram icon…</svg>
+      </template>
+    </DtAvatar>
+  </template>
+</DtAvatarLabel>
+```
+
+## DtAvatarGroup
+
+Horizontal stack of avatars with overlap, an optional `+N` overflow chip, and an optional add button. Three sizes — `xs` (24), `sm` (32), `md` (40) — with overlap `4 / 8 / 12px` and a 1.5px white halo on each avatar so they read cleanly against each other.
+
+### Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `users` | `Array<{ src?, alt?, name?, initials? }>` | `[]` | Data-driven shortcut — renders one `DtAvatar` per entry. |
+| `max` | `number` | — | Visible cap when using `users`. Extra users collapse into a `+N` chip. |
+| `size` | `'xs' \| 'sm' \| 'md'` | `'md'` | Controls overlap and child avatar size. |
+| `showAdd` | `boolean` | `false` | Appends a `DtAvatarAdd` after the stack. |
+| `addAriaLabel` | `string` | `'Add member'` | `aria-label` for the add button. |
+
+### Events
+
+| Event | Description |
+| ------- | ------------- |
+| `add` | Fired when the add button is clicked. |
+
+### Slots
+
+| Slot | Description |
+| ------ | ------------- |
+| `default` | Slot-based override — drop `DtAvatar` children directly. Stacking and white halo are applied via CSS; you control individual avatar props (size, status, bordered). |
+
+### Examples
+
+```vue
+<!-- Data-driven, 5 visible, overflow into +N -->
+<DtAvatarGroup
+  :users="users"
+  :max="5"
+  size="md"
+  show-add
+  @add="invite"
+/>
+
+<!-- Slot-based for full control -->
+<DtAvatarGroup size="md" show-add @add="invite">
+  <DtAvatar src="/a.jpg" />
+  <DtAvatar src="/b.jpg" />
+  <DtAvatar name="Mardon Shonazarov" />
+</DtAvatarGroup>
+```
+
+> Status indicators on avatars inside a stacked group are hidden — the overlap clips them. Use a non-stacked layout (e.g. a list with `DtAvatarLabel`) if you need per-avatar status.
+
+## DtAvatarAdd
+
+Standalone dashed-circle "+" button. Use it inside an `AvatarGroup` (set `show-add`), or anywhere else you need an "add member"-style affordance.
+
+### Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `size` | `'xs' \| 'sm' \| 'md'` | `'md'` | Box size (24 / 32 / 40). |
+| `disabled` | `boolean` | `false` | Native `disabled` state. |
+| `ariaLabel` | `string` | `'Add'` | Accessible name (icon-only button). |
+
+### States
+
+Built-in hover (tinted background + darker border), `:focus-visible` ring at `--dt-color-ring`, and disabled (muted background, no pointer).
+
+```vue
+<DtAvatarAdd size="sm" @click="invite" />
+<DtAvatarAdd size="md" disabled />
+```
+
+## CSS Custom Properties
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-color-background-tertiary` | Avatar fallback background. |
+| `--dt-color-border` | Inner 1px border and bordered outer ring. |
+| `--dt-color-text-tertiary` | Initials and user-icon color. |
+| `--dt-color-background` | White halo around the status indicator. |
+| `--dt-color-success` | `status="online"` dot. |
+| `--dt-gray-300` | `status="offline"` dot. |
+| `--dt-radius-full` | Circle radius. |
+| `--dt-spacing-md` | Gap between avatar and label in `DtAvatarLabel`. |
+
+## Accessibility
+
+- `<img>` uses `alt` (or `name` as fallback). Decorative avatars can pass `alt=""`.
+- The user-icon fallback is `aria-hidden`.
+- When initials render, a visually-hidden text node carries the full name so screen readers announce the person, not the letters.
+- The status indicator is decorative by default — convey meaningful state through text in `DtAvatarLabel` (e.g. "Active now") rather than relying on color alone.
+
+---
+
+# DtRadio
+
+A radio button component with 3 sizes (lg/md/sm), animated selection dot, and label slot. Uses a hidden native `<input type="radio">` for accessibility. Group multiple radios with the same `name` prop.
+
+## Import
+
+```ts
+import { DtRadio } from '@/components/ui/radio'
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `modelValue` | `string \| number` | — | Currently selected value in the group. Use with `v-model`. |
+| `value` | `string \| number` | **required** | This radio's value. |
+| `size` | `'lg' \| 'md' \| 'sm'` | `'md'` | Radio size. |
+| `disabled` | `boolean` | `false` | Disables the radio. |
+| `name` | `string` | — | Group name for native radio behavior. |
+
+## Events
+
+| Event | Payload | Description |
+| ------- | --------- | ------------- |
+| `update:modelValue` | `string \| number` | Emitted when selected. |
+
+## Sizes
+
+| Size | Circle | Inner Dot |
+| ------ | -------- | ----------- |
+| `lg` | 24x24px | 10px |
+| `md` | 20x20px | 8px |
+| `sm` | 16x16px | 6px |
+
+## Usage
+
+```vue
+<script setup>
+const plan = ref('free')
+</script>
+
+<template>
+  <DtRadio v-model="plan" value="free" name="plan">Free</DtRadio>
+  <DtRadio v-model="plan" value="pro" name="plan">Pro</DtRadio>
+  <DtRadio v-model="plan" value="enterprise" name="plan">Enterprise</DtRadio>
+</template>
+```
+
+## States
+
+- **Unselected**: `--dt-gray-200` background
+- **Hover**: `--dt-gray-300` background
+- **Selected**: `--dt-color-accent` background, white dot (animated pop)
+- **Disabled**: `--dt-gray-100` background, muted label
+
+---
+
+# DtCheckbox
+
+A checkbox component with 3 sizes (lg/md/sm), animated checkmark, and label slot. Uses a hidden native `<input type="checkbox">` for accessibility.
+
+## Import
+
+```ts
+import { DtCheckbox } from '@/components/ui/checkbox'
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `modelValue` | `boolean` | `false` | Checked state. Use with `v-model`. |
+| `size` | `'lg' \| 'md' \| 'sm'` | `'md'` | Checkbox size. |
+| `disabled` | `boolean` | `false` | Disables the checkbox. |
+| `id` | `string` | auto-generated | HTML id for label association. |
+
+## Events
+
+| Event | Payload | Description |
+| ------- | --------- | ------------- |
+| `update:modelValue` | `boolean` | Emitted when toggled. |
+
+## Slots
+
+| Slot | Description |
+| ------ | ------------- |
+| `default` | Label text next to the checkbox. |
+
+## Sizes
+
+| Size | Box | Check Icon |
+| ------ | ----- | ------------ |
+| `lg` | 24x24px | 14px |
+| `md` | 20x20px | 12px |
+| `sm` | 16x16px | 10px |
+
+## Usage
+
+```vue
+<DtCheckbox v-model="agreed">I agree to the terms</DtCheckbox>
+<DtCheckbox v-model="agreed" size="lg" />
+<DtCheckbox v-model="agreed" disabled>Disabled</DtCheckbox>
+```
+
+## States
+
+- **Unchecked**: `--dt-gray-200` background
+- **Hover**: `--dt-gray-300` background
+- **Checked**: `--dt-color-accent` background, white checkmark
+- **Disabled**: `--dt-gray-100` background, muted label
+
+---
+
+# DtToggle
+
+A switch toggle component with 3 sizes (lg/md/sm) and smooth thumb animation. Uses `role="switch"` with `aria-checked` for accessibility.
+
+## Import
+
+```ts
+import { DtToggle } from '@/components/ui/toggle'
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `modelValue` | `boolean` | `false` | Toggle state. Use with `v-model`. |
+| `size` | `'lg' \| 'md' \| 'sm'` | `'md'` | Toggle size. |
+| `disabled` | `boolean` | `false` | Disables the toggle. |
+
+## Events
+
+| Event | Payload | Description |
+| ------- | --------- | ------------- |
+| `update:modelValue` | `boolean` | Emitted when toggled. |
+
+## Sizes
+
+| Size | Track | Thumb |
+| ------ | ------- | ------- |
+| `lg` | 44x24px | 20px |
+| `md` | 36x20px | 16px |
+| `sm` | 32x18px | 14px |
+
+## Usage
+
+```vue
+<DtToggle v-model="enabled" />
+<DtToggle v-model="enabled" size="lg" />
+<DtToggle v-model="enabled" disabled />
+```
+
+## States
+
+- **Off**: `--dt-gray-200` track, white thumb
+- **Hover**: `--dt-gray-300` track
+- **On**: `--dt-color-accent` track, white thumb
+- **Disabled**: 50% opacity
+
+---
+
+# DtSelect
+
+A Reka UI backed select component with DT styling. It keeps the existing compound API (`DtSelect`, `DtSelectTrigger`, `DtSelectContent`, `DtSelectItem`) while delegating selection state, positioning, typeahead, focus management, ARIA attributes, and keyboard navigation to `reka-ui`.
+
+## Dependency
+
+This component imports primitives from `reka-ui`. The `dt-ui` CLI installs `reka-ui@2.9.6` when you run:
+
+```bash
+npx dt-ui add select
+```
+
+## Import
+
+```ts
+import {
+  DtSelect,
+  DtSelectTrigger,
+  DtSelectContent,
+  DtSelectItem,
+} from '@/components/ui/select'
+```
+
+## Usage
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import {
+  DtSelect,
+  DtSelectTrigger,
+  DtSelectContent,
+  DtSelectItem,
+} from '@/components/ui/select'
+
+const fruit = ref<string | null>(null)
+</script>
+
+<template>
+  <DtSelect v-model="fruit" placeholder="Choose a fruit...">
+    <DtSelectTrigger />
+    <DtSelectContent>
+      <DtSelectItem value="apple" label="Apple" />
+      <DtSelectItem value="banana" label="Banana" />
+      <DtSelectItem value="cherry" label="Cherry" />
+    </DtSelectContent>
+  </DtSelect>
+</template>
+```
+
+You can still provide custom trigger content:
+
+```vue
+<DtSelectTrigger>
+  {{ fruit ?? 'Choose a fruit...' }}
+</DtSelectTrigger>
+```
+
+## DtSelect Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `modelValue` | `string \| number \| null` | `undefined` | Controlled selected value. Use with `v-model`. |
+| `defaultValue` | `string \| number` | `undefined` | Initial uncontrolled value. |
+| `placeholder` | `string` | `'Select an option...'` | Placeholder used by the default trigger value. |
+| `disabled` | `boolean` | `false` | Disables the entire select. |
+| `name` | `string` | `undefined` | Native form field name forwarded to Reka UI. |
+| `required` | `boolean` | `false` | Native form required state forwarded to Reka UI. |
+
+## DtSelectTrigger
+
+Renders a Reka `SelectTrigger` styled as the DT trigger. If no default slot is provided, it displays Reka `SelectValue`, which shows the selected item's text or the `placeholder`.
+
+## DtSelectContent
+
+Renders a teleported Reka `SelectContent` using `position="popper"`, aligned to the trigger width. The default slot should contain `DtSelectItem` components.
+
+| Slot | Description |
+| ------ | ------------- |
+| `default` | Select items. |
+| `search` | Optional custom content above the item list. |
+| `empty` | Optional empty-state content. |
+
+## DtSelectItem Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `value` | `string \| number` | required | Item value. Must not be an empty string. |
+| `label` | `string` | `String(value)` | Text used for typeahead and default selected display. |
+| `disabled` | `boolean` | `false` | Prevents selection. |
+
+## Events
+
+| Event | Payload | Description |
+| ------- | --------- | ------------- |
+| `update:modelValue` | `string \| number \| null` | Emitted when the selected value changes. |
+
+## Accessibility
+
+Reka UI provides the select-only combobox/listbox behavior: ARIA roles and state attributes, roving item focus, typeahead, Escape dismissal, and Arrow/Enter/Space keyboard interactions. Keep a visible label or pass an accessible label to the trigger when the surrounding form does not already identify the field.
+
+---
+
+# DtInput
+
+A text input component with built-in label, error message, and hint text support. Wraps a native `<input>` element and provides two-way binding through `v-model`. Automatically links the label and error/hint text to the input using generated or user-supplied `id` values for proper accessibility.
+
+## Import
+
+```ts
+import { DtInput } from '@/components/ui/input'
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `modelValue` | `string \| number` | `undefined` | The bound value. Use with `v-model`. |
+| `type` | `InputType` | `'text'` | The native input type. |
+| `placeholder` | `string` | `undefined` | Placeholder text shown when the input is empty. |
+| `disabled` | `boolean` | `false` | Disables the input (reduces opacity, sets `cursor: not-allowed`, and applies `--dt-color-background-tertiary` background). |
+| `error` | `string` | `undefined` | Error message text. When set, the input border turns red and the error message is displayed below the input. |
+| `hint` | `string` | `undefined` | Hint text displayed below the input. Only shown when `error` is not set. |
+| `id` | `string` | auto-generated | HTML `id` for the input element. If not provided, a random id (`dt-input-*`) is generated. Used to associate the label and describedby elements. |
+
+### Type Reference
+
+```ts
+type InputType = 'text' | 'email' | 'password' | 'number' | 'search' | 'tel' | 'url'
+```
+
+## Slots
+
+| Slot | Description |
+| ------ | ------------- |
+| `label` | Content for the `<label>` element above the input. The label automatically receives a `for` attribute pointing to the input `id`. If this slot is empty, no label is rendered. |
+
+## Events
+
+| Event | Payload | Description |
+| ------- | --------- | ------------- |
+| `update:modelValue` | `string \| number` | Emitted on every input event. When `type="number"`, the value is coerced to `Number` before emitting. |
+
+All other native input events (`focus`, `blur`, `keydown`, etc.) are forwarded through `v-bind="attrs"` on the `<input>` element.
+
+## Usage Examples
+
+### Basic Text Input
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { DtInput } from '@/components/ui/input'
+
+const name = ref('')
+</script>
+
+<template>
+  <DtInput v-model="name" placeholder="Enter your name">
+    <template #label>Full Name</template>
+  </DtInput>
+</template>
+```
+
+### Input with Validation Error and Hint
+
+```vue
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+import { DtInput } from '@/components/ui/input'
+
+const email = ref('')
+
+const emailError = computed(() => {
+  if (!email.value) return undefined
+  return email.value.includes('@') ? undefined : 'Please enter a valid email address'
+})
+</script>
+
+<template>
+  <DtInput
+    v-model="email"
+    type="email"
+    placeholder="you@example.com"
+    :error="emailError"
+    hint="We will never share your email with anyone."
+  >
+    <template #label>Email Address</template>
+  </DtInput>
+</template>
+```
+
+### Composed with DtCard and DtButton for a Login Form
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { DtInput } from '@/components/ui/input'
+import { DtButton } from '@/components/ui/button'
+import { DtCard, DtCardHeader, DtCardContent, DtCardFooter } from '@/components/ui/card'
+
+const email = ref('')
+const password = ref('')
+const loading = ref(false)
+
+async function submit() {
+  loading.value = true
+  // ... perform login
+  loading.value = false
+}
+</script>
+
+<template>
+  <DtCard :shadow="true" style="max-width: 24rem;">
+    <DtCardHeader>
+      <h3>Sign In</h3>
+      <p>Enter your credentials to access your account.</p>
+    </DtCardHeader>
+    <DtCardContent>
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <DtInput v-model="email" type="email" placeholder="you@example.com">
+          <template #label>Email</template>
+        </DtInput>
+        <DtInput v-model="password" type="password" placeholder="Your password">
+          <template #label>Password</template>
+        </DtInput>
+      </div>
+    </DtCardContent>
+    <DtCardFooter>
+      <DtButton :loading="loading" style="width: 100%;" @click="submit">
+        Sign In
+      </DtButton>
+    </DtCardFooter>
+  </DtCard>
+</template>
+```
+
+## CSS Custom Properties
+
+### Colors
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-color-text` | Input text color and label color. |
+| `--dt-color-background` | Input background color. |
+| `--dt-color-background-tertiary` | Disabled input background color. |
+| `--dt-color-text-secondary` | Placeholder text color and hint text color. |
+| `--dt-color-border` | Default border color. |
+| `--dt-color-border-hover` | Border color on hover. |
+| `--dt-color-ring` | Border and box-shadow color on focus. |
+| `--dt-color-error` | Border and box-shadow color when `error` is set. Also used for error text color. |
+
+### Layout & Typography
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-spacing-xs` | Gap between label, input, and error/hint elements. |
+| `--dt-radius-sm` | Input border-radius. |
+| `--dt-text-body-xs` | Error and hint text font size. |
+| `--dt-text-body-sm` | Label font size. |
+| `--dt-text-body-md` | Input text font size. |
+| `--dt-transition-base` | Duration/easing for border-color and box-shadow transitions. |
+
+## Accessibility
+
+- The `<label>` element uses a `for` attribute linked to the input `id`, providing a clickable label that focuses the input.
+- When `error` is set, `aria-invalid="true"` is added to the input, signaling the invalid state to assistive technologies.
+- The `aria-describedby` attribute is dynamically set to point at either the error element (id: `{id}-error`) or the hint element (id: `{id}-hint`), so screen readers announce the supplementary text when the input is focused.
+- Error messages are rendered with `role="alert"`, causing screen readers to announce them immediately when they appear.
+- The disabled state uses both the native `disabled` attribute and an opacity wrapper class, ensuring the input is removed from the tab order.
+- Focus styles use a visible box-shadow ring (`color-mix(in srgb, var(--dt-ring) 25%, transparent)`) in addition to the border color change, providing a clear visual indicator for keyboard users.
+
+---
+

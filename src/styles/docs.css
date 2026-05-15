@@ -1,0 +1,178 @@
+/* ─────────────────────────────────────────────────────────────
+   Docs site — page-level layout helpers
+   Pure CSS using --dt-* tokens. No tailwind, no preprocessor.
+   ───────────────────────────────────────────────────────────── */
+
+html, body, #app {
+  height: 100%;
+  margin: 0;
+}
+
+/* Smooth theme switch — applied briefly when toggling, then removed.
+   Keeps initial page load free of transitions (no FOUT). */
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition: background-color 200ms ease,
+              border-color 200ms ease,
+              color 200ms ease,
+              box-shadow 200ms ease,
+              fill 200ms ease,
+              stroke 200ms ease !important;
+}
+
+a {
+  color: var(--dt-color-accent);
+  text-decoration: none;
+}
+
+/* Underline only inside prose — nav links, sidebar items, buttons-as-links etc.
+   manage their own affordances. */
+.dx-doc a:hover {
+  text-decoration: underline;
+}
+
+/* Inline code outside of prose contexts (e.g., inside cards, tables).
+   Zero vertical padding/border keeps inline <code> from disrupting line-height
+   in prose; horizontal padding gives breathing room around the tinted chip. */
+code:not([class*='language-']):not(pre code) {
+  background: var(--dt-color-background-tertiary);
+  border-radius: var(--dt-radius-xs);
+  padding: 0 0.4em;
+  font-family: var(--dt-font-mono);
+  font-size: 0.9em;
+  color: var(--dt-color-text);
+}
+
+/* ─── Prose context — long-form documentation pages ──────────
+   Direct-child selectors (>) so styling only applies to author-written
+   prose, not headings/paragraphs inside DtCard, DtDialog, DtTabSwitcher,
+   or any other component slot rendered through child views. */
+
+.dx-doc {
+  max-width: 768px;
+}
+
+.dx-doc > p {
+  margin: 0 0 var(--dt-spacing-xl) 0;
+  line-height: var(--dt-leading-body-md);
+}
+
+.dx-doc > h1,
+.dx-doc > h2,
+.dx-doc > h3,
+.dx-doc > h4 {
+  margin: 0 0 var(--dt-spacing-lg) 0;
+  color: var(--dt-color-text);
+  font-weight: var(--dt-font-medium);
+  line-height: 1.2;
+}
+
+.dx-doc > h1 {
+  font-size: var(--dt-text-h4);
+  margin-bottom: var(--dt-spacing-xl);
+}
+
+.dx-doc > h2 {
+  font-size: var(--dt-text-h5);
+  margin-top: var(--dt-spacing-7xl);
+}
+
+.dx-doc > h3 {
+  font-size: var(--dt-text-body-md);
+  margin-top: var(--dt-spacing-5xl);
+}
+
+.dx-doc > ul,
+.dx-doc > ol {
+  margin: 0 0 var(--dt-spacing-xl) 0;
+  padding-left: var(--dt-spacing-5xl);
+  line-height: var(--dt-leading-body-md);
+}
+
+.dx-doc > ul > li + li,
+.dx-doc > ol > li + li {
+  margin-top: var(--dt-spacing-md);
+}
+
+/* Section divider for in-page content */
+.dx-section + .dx-section {
+  margin-top: var(--dt-spacing-7xl);
+}
+
+.dx-eyebrow {
+  display: inline-block;
+  font-size: var(--dt-text-body-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--dt-color-text-tertiary);
+  font-weight: var(--dt-font-medium);
+  margin-bottom: var(--dt-spacing-sm);
+}
+
+.dx-lead {
+  font-size: var(--dt-text-body-md);
+  color: var(--dt-color-text-secondary);
+  line-height: var(--dt-leading-body-md);
+  max-width: 64ch;
+}
+
+/* Component preview surface (for component docs pages) */
+.dx-preview {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dt-spacing-lg);
+  padding: var(--dt-spacing-5xl);
+  background: var(--dt-color-background);
+  border: 1px solid var(--dt-color-border);
+  border-radius: var(--dt-radius-md);
+  min-height: 120px;
+}
+
+.dx-preview--column {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Tab panel margin between tabs and content */
+.dx-tab-panel {
+  margin-top: var(--dt-spacing-xl);
+}
+
+/* Hero (home page) */
+.dx-hero {
+  padding: var(--dt-spacing-9xl) 0 var(--dt-spacing-7xl);
+  text-align: center;
+}
+
+.dx-hero__title {
+  font-size: var(--dt-text-h3);
+  line-height: var(--dt-leading-h3);
+  font-weight: var(--dt-font-medium);
+  margin-bottom: var(--dt-spacing-xl);
+}
+
+.dx-hero__lead {
+  font-size: var(--dt-text-h5);
+  color: var(--dt-color-text-secondary);
+  max-width: 56ch;
+  margin: 0 auto var(--dt-spacing-5xl);
+  line-height: var(--dt-leading-h5);
+}
+
+.dx-hero__actions {
+  display: inline-flex;
+  gap: var(--dt-spacing-lg);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Feature grid on home */
+.dx-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--dt-spacing-xl);
+  margin-top: var(--dt-spacing-9xl);
+}

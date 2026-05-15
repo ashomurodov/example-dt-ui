@@ -1,0 +1,25 @@
+{
+  "framework": "vue-vite",
+  "componentsDir": "src/components/ui",
+  "libDir": "src/lib",
+  "stylesDir": "src/styles",
+  "installedComponents": [
+    "layout",
+    "search-toolbar",
+    "tab-switcher",
+    "pagination",
+    "data-table",
+    "dialog",
+    "button",
+    "card",
+    "status-badge",
+    "badge",
+    "avatar",
+    "radio",
+    "checkbox",
+    "toggle",
+    "select",
+    "input"
+  ],
+  "agent": true
+}
