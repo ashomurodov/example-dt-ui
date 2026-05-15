@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useAttrs } from 'vue'
+import { computed, nextTick, ref, useAttrs } from 'vue'
 
 export type InputVariant = 'primary' | 'secondary'
 export type InputSize = 'sm' | 'md' | 'lg' | 'xl'
@@ -18,6 +18,8 @@ const props = withDefaults(defineProps<{
   placeholder?: string
   disabled?: boolean
   clearable?: boolean
+  /** Reduce left padding so a chip-style prefix (e.g. phone flag) can sit close to the edge. */
+  compactPrefix?: boolean
   id?: string
 }>(), {
   type: 'text',
@@ -26,6 +28,7 @@ const props = withDefaults(defineProps<{
   labelPosition: 'top',
   disabled: false,
   clearable: false,
+  compactPrefix: false,
 })
 
 const emit = defineEmits<{
@@ -50,12 +53,22 @@ const effectivePlaceholder = computed(() => {
   return props.placeholder
 })
 
-function onInput(event: Event) {
+async function onInput(event: Event) {
   const target = event.target as HTMLInputElement
   const value = props.type === 'number' && target.value !== ''
     ? Number(target.value)
     : target.value
   emit('update:modelValue', value)
+
+  // Re-sync the DOM after parent reactivity settles. Handles the case where
+  // the parent masked/normalized the input back to the same value Vue was
+  // already bound to (e.g. typing past a phone mask's digit limit) — without
+  // this, Vue skips the re-render and the DOM keeps the overflowed text.
+  await nextTick()
+  const expected = props.modelValue == null ? '' : String(props.modelValue)
+  if (target.value !== expected) {
+    target.value = expected
+  }
 }
 
 function onClear() {
@@ -85,6 +98,7 @@ function onClear() {
         state && `dt-input--${state}`,
         disabled && 'dt-input--disabled',
         hasValue && 'dt-input--has-value',
+        compactPrefix && 'dt-input--compact-prefix',
       ]"
     >
       <span v-if="$slots.prefix" class="dt-input__adornment dt-input__adornment--start">
@@ -223,6 +237,10 @@ function onClear() {
   font-size: 18px;
   border-width: 2px;
 }
+
+/* Compact-prefix mode: shrink the left padding so a chip prefix sits close to the edge. */
+.dt-input--compact-prefix { padding-left: var(--dt-spacing-sm); }
+.dt-input--compact-prefix .dt-input__adornment--start { margin-right: var(--dt-spacing-md); }
 
 /* ── Native input ──────────────────────────── */
 .dt-input__field-wrap {
