@@ -83,9 +83,7 @@ function submit() {
           <h3>New item</h3>
         </DtDialogHeader>
 
-        <DtInput v-model="name" placeholder="Item name">
-          <template #label>Title</template>
-        </DtInput>
+        <DtInput v-model="name" label="Title" placeholder="Item name" />
 
         <DtDialogFooter>
           <DtButton type="button" variant="outline" @click="open = false">Cancel</DtButton>
@@ -167,9 +165,7 @@ const subRows = [
                 <DtDialogHeader>
                   <h3>New item</h3>
                 </DtDialogHeader>
-                <DtInput v-model="formName" placeholder="Item name">
-                  <template #label>Title</template>
-                </DtInput>
+                <DtInput v-model="formName" label="Title" placeholder="Item name" />
                 <DtDialogFooter>
                   <DtButton type="button" variant="outline" @click="open = false">Cancel</DtButton>
                   <DtButton type="submit">Create</DtButton>

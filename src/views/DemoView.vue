@@ -220,9 +220,7 @@ function formatAmount(n: number): string {
           <p>Demo only — submit doesn't persist.</p>
         </DtDialogHeader>
 
-        <DtInput v-model="newName" placeholder="e.g. Contract — Vendor X">
-          <template #label>Document name</template>
-        </DtInput>
+        <DtInput v-model="newName" label="Document name" placeholder="e.g. Contract — Vendor X" />
 
         <DtDialogFooter>
           <DtButton variant="outline" @click="showCreate = false">Cancel</DtButton>

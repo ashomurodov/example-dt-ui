@@ -1,21 +1,63 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { ref, onMounted, h } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { DtLayout, DtLayoutHeader, DtLayoutSidebar } from '@/components/ui/layout'
-import { DtToggle } from '@/components/ui/toggle'
+import {
+  DtLayout,
+  DtLayoutHeader,
+  DtLayoutSidebar,
+  DtProfileModal,
+  type DtModuleItem,
+  type DtUser,
+} from '@/components/ui/layout'
 import { useSidebarNav } from '@/data/nav'
 import SearchDialog from '@/partials/SearchDialog.vue'
-import { isDark, setTheme } from '@/composables/useTheme'
+import { theme, setTheme, type ThemeMode } from '@/composables/useTheme'
+import { locale, setLocale, type AppLocale } from '@/i18n'
 
 const { t } = useI18n()
 const { sidebarItems, sidebarSections } = useSidebarNav()
 const showSearch = ref(false)
+const showProfile = ref(false)
 
-// Bridge isDark to a writable model for the toggle in the header.
-const isDarkModel = computed({
-  get: () => isDark.value,
-  set: (val) => setTheme(val ? 'dark' : 'light'),
-})
+// Test user — used so visitors can see the profile + modules patterns
+// (theme + locale switchers live inside the profile modal).
+const demoUser: DtUser = {
+  first_name: 'Demo',
+  last_name: 'User',
+  organization_name: 'dt-ui docs',
+  phone_numbers: [{ number: '+998 90 000 00 00' }],
+}
+
+// Inline icons for the modules switcher (kept inline to avoid an icon dep).
+const GridIcon = () =>
+  h('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+    h('rect', { x: '3', y: '3', width: '7', height: '7', rx: '1' }),
+    h('rect', { x: '14', y: '3', width: '7', height: '7', rx: '1' }),
+    h('rect', { x: '3', y: '14', width: '7', height: '7', rx: '1' }),
+    h('rect', { x: '14', y: '14', width: '7', height: '7', rx: '1' }),
+  ])
+
+const FileIcon = () =>
+  h('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+    h('path', { d: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z' }),
+    h('path', { d: 'M14 2v6h6M16 13H8M16 17H8M10 9H8' }),
+  ])
+
+const BoxIcon = () =>
+  h('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+    h('path', { d: 'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z' }),
+    h('path', { d: 'M3.27 6.96 12 12.01l8.73-5.05M12 22.08V12' }),
+  ])
+
+const modules: DtModuleItem[] = [
+  { key: 'ui',   label: 'UI',        icon: BoxIcon,  href: '#' },
+  { key: 'crm',  label: 'CRM',       icon: GridIcon, href: '#' },
+  { key: 'docs', label: 'Documents', icon: FileIcon, href: '#' },
+]
+
+function onThemeChange(value: ThemeMode) { setTheme(value) }
+function onLocaleChange(value: AppLocale) { setLocale(value) }
+function onLogout() { showProfile.value = false }
 
 onMounted(() => {
   // Cmd/Ctrl+K opens search anywhere
@@ -37,8 +79,10 @@ function openSearch() {
     <template #header>
       <DtLayoutHeader
         badge="UI"
-        :show-modules-button="false"
-        :show-profile-button="false"
+        active-module="ui"
+        :modules="modules"
+        :profile-name="`${demoUser.first_name} ${demoUser.last_name}`"
+        @toggle-profile="showProfile = !showProfile"
       >
         <template #logo>
           <RouterLink to="/" class="dt-docs__brand" aria-label="dt-ui home">
@@ -61,11 +105,18 @@ function openSearch() {
               <path d="m21 21-4.3-4.3" />
             </svg>
           </button>
+        </template>
 
-          <label class="dt-docs__theme-toggle" :title="isDark ? t('chrome.switchToLight') : t('chrome.switchToDark')">
-            <span class="dt-docs__theme-toggle-label">{{ isDark ? '🌙' : '☀️' }}</span>
-            <DtToggle v-model="isDarkModel" size="sm" />
-          </label>
+        <template #profile-dropdown>
+          <DtProfileModal
+            v-model="showProfile"
+            :user="demoUser"
+            :theme="theme"
+            :locale="locale"
+            @theme-change="onThemeChange"
+            @locale-change="onLocaleChange"
+            @logout="onLogout"
+          />
         </template>
       </DtLayoutHeader>
     </template>
@@ -103,19 +154,6 @@ function openSearch() {
   height: 32px;
   color: var(--dt-color-text);
   flex-shrink: 0;
-}
-
-.dt-docs__theme-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--dt-spacing-md);
-  padding: 0 var(--dt-spacing-md);
-  cursor: pointer;
-}
-
-.dt-docs__theme-toggle-label {
-  font-size: var(--dt-text-body-sm);
-  line-height: 1;
 }
 
 /* Search trigger — icon-only button sized to match the modules/profile

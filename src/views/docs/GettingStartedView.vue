@@ -33,9 +33,7 @@ const name = ref('')
 <\/script>
 
 <template>
-  <DtInput v-model="name" placeholder="Your name">
-    <template #label>Name</template>
-  </DtInput>
+  <DtInput v-model="name" label="Name" placeholder="Your name" />
 
   <DtButton>Save</DtButton>
 </template>`
