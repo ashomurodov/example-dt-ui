@@ -33,6 +33,7 @@ const routes: RouteRecordRaw[] = [
 
   // Components — Overlay
   { path: '/components/dialog', name: 'dialog', component: () => import('@/views/components/DialogView.vue') },
+  { path: '/components/dropdown-menu', name: 'dropdown-menu', component: () => import('@/views/components/DropdownMenuView.vue') },
 
   // 404 → home
   { path: '/:pathMatch(.*)*', redirect: '/' },

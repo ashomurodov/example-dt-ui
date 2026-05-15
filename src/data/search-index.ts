@@ -46,6 +46,7 @@ const seeds: SearchSeed[] = [
   { titleKey: 'nav.layout',         descKey: 'search.descriptions.layout',         group: 'Navigation',   to: '/components/layout',      keywords: 'shell app header sidebar nav modules profile page divider' },
   // Overlay
   { titleKey: 'nav.dialog',         descKey: 'search.descriptions.dialog',         group: 'Overlay',      to: '/components/dialog',      keywords: 'modal popup overlay confirm form' },
+  { titleKey: 'nav.dropdownMenu',   descKey: 'search.descriptions.dropdownMenu',   group: 'Overlay',      to: '/components/dropdown-menu', keywords: 'dropdown menu popover floating action contextual submenu checkbox radio reka' },
 ]
 
 export function useSearchIndex() {

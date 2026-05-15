@@ -54,6 +54,7 @@ export function useSidebarNav() {
       title: t('nav.sections.overlay'),
       items: [
         { key: 'c-dialog', to: '/components/dialog', label: t('nav.dialog') },
+        { key: 'c-dropdown-menu', to: '/components/dropdown-menu', label: t('nav.dropdownMenu') },
       ],
     },
   ])

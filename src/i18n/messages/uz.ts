@@ -37,6 +37,7 @@ export default {
     searchToolbar: 'Qidiruv paneli',
     layout: 'Karkas',
     dialog: 'Dialog',
+    dropdownMenu: 'Dropdown menyu',
   },
   search: {
     groups: {
@@ -76,6 +77,7 @@ export default {
       searchToolbar: 'Ixtiyoriy harakat tugmasi bilan qidiruv.',
       layout: 'Ilova karkasi — DtLayout, Header, Sidebar, ModulesModal, ProfileModal, PageView, Divider.',
       dialog: 'Overlay, focus trap, Escape orqali yopiluvchi modal dialog.',
+      dropdownMenu: 'Item, separator, label, checkbox/radio item va ichki submenular bilan suzuvchi menyu.',
     },
   },
   common: {
@@ -222,5 +224,6 @@ export default {
     tabSwitcher: { lead: 'Animatsiyali ko‘rsatkichli gorizontal pill tab-switcher. Har bir tab uchun ixtiyoriy belgilar.' },
     searchToolbar: { lead: 'O‘ng tomonda ixtiyoriy asosiy harakat tugmasi bilan birga qidiruv maydoni.' },
     dialog: { lead: 'Reka UI asosidagi modal dialog. Trigger / kontent / sarlavha / futer — kompozitsion qismlar.' },
+    dropdownMenu: { lead: 'Reka UI asosidagi suzuvchi menyu. Trigger, kontent, itemlar, separator, label, group, checkbox/radio item va ichki submenu — kompozitsion qismlar.' },
   },
 }

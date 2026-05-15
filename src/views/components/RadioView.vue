@@ -16,31 +16,63 @@ const tabs: DtTab[] = [
 
 const plan = ref('pro')
 const sizesPlan = ref('pro')
+const descriptionPlan = ref('pro')
 
 const groupTab = ref('preview')
 const sizesTab = ref('preview')
+const descriptionTab = ref('preview')
+const stateTab = ref('preview')
 
-const groupCode = `<DtRadio v-model="plan" value="free" name="plan">Free</DtRadio>
-<DtRadio v-model="plan" value="pro" name="plan">Pro</DtRadio>
-<DtRadio v-model="plan" value="enterprise" name="plan">Enterprise</DtRadio>
-<DtRadio :model-value="''" value="disabled" name="plan" disabled>Disabled</DtRadio>`
+const groupCode = `<DtRadio v-model="plan" value="free"       name="plan">Free</DtRadio>
+<DtRadio v-model="plan" value="pro"        name="plan">Pro</DtRadio>
+<DtRadio v-model="plan" value="enterprise" name="plan">Enterprise</DtRadio>`
 
-const sizesCode = `<DtRadio v-model="plan" value="free" name="p-lg" size="lg">Large</DtRadio>
-<DtRadio v-model="plan" value="pro" name="p-md" size="md">Medium</DtRadio>
-<DtRadio v-model="plan" value="enterprise" name="p-sm" size="sm">Small</DtRadio>`
+const sizesCode = `<DtRadio v-model="plan" value="a" name="sz-sm" size="sm">Small</DtRadio>
+<DtRadio v-model="plan" value="b" name="sz-md" size="md">Medium</DtRadio>
+<DtRadio v-model="plan" value="c" name="sz-lg" size="lg">Large</DtRadio>`
+
+const descriptionCode = `<DtRadio
+  v-model="plan"
+  value="free"
+  name="plan"
+  label="Free"
+  description="Core features for personal projects."
+/>
+<DtRadio
+  v-model="plan"
+  value="pro"
+  name="plan"
+  label="Pro"
+  description="All features, priority support, 30-day trial."
+/>`
+
+const stateCode = `<DtRadio value="off" name="dis" disabled>Disabled</DtRadio>
+<DtRadio :model-value="'on'" value="on" name="dis" disabled>Disabled (selected)</DtRadio>`
 
 const propsCols: DtColumn[] = [
-  { key: 'name', label: 'Prop', width: '160px' },
+  { key: 'name', label: 'Prop', width: '140px' },
   { key: 'type', label: 'Type' },
   { key: 'default', label: 'Default', width: '120px' },
   { key: 'desc', label: 'Description' },
 ]
 const propsRows = [
-  { name: 'modelValue', type: 'string | number', default: '—', desc: 'Currently selected group value (v-model).' },
-  { name: 'value', type: 'string | number', default: 'required', desc: 'This option\'s value.' },
-  { name: 'size', type: "'lg' | 'md' | 'sm'", default: "'md'", desc: 'Outer + inner dot dimensions.' },
-  { name: 'disabled', type: 'boolean', default: 'false', desc: 'Prevents selection.' },
-  { name: 'name', type: 'string', default: '—', desc: 'Native form group name. Use the same name for all radios in a group.' },
+  { name: 'modelValue',  type: 'string | number',     default: '—',         desc: 'Currently selected group value (v-model).' },
+  { name: 'value',       type: 'string | number',     default: 'required',  desc: "This option's value." },
+  { name: 'size',        type: "'sm' | 'md' | 'lg'",  default: "'md'",      desc: 'Circle: 16 / 20 / 24 px.' },
+  { name: 'disabled',    type: 'boolean',             default: 'false',     desc: 'Native disabled state.' },
+  { name: 'name',        type: 'string',              default: '—',         desc: 'Native form group name. Use the same name for all radios in a group.' },
+  { name: 'label',       type: 'string',              default: '—',         desc: 'Inline label. Default slot wins.' },
+  { name: 'description', type: 'string',              default: '—',         desc: 'Secondary text rendered under the label.' },
+  { name: 'id',          type: 'string',              default: 'auto',      desc: 'HTML id for label association.' },
+]
+
+const slotsCols: DtColumn[] = [
+  { key: 'name', label: 'Slot', width: '140px' },
+  { key: 'desc', label: 'Description' },
+]
+const slotsRows = [
+  { name: 'default',     desc: 'Label content. Overrides the `label` prop.' },
+  { name: 'description', desc: 'Description content. Overrides the `description` prop.' },
 ]
 </script>
 
@@ -55,11 +87,10 @@ const propsRows = [
       <h2>Group</h2>
       <DtTabSwitcher v-model="groupTab" :tabs="tabs" />
       <div class="dx-tab-panel">
-        <div v-if="groupTab === 'preview'" class="dx-preview">
-          <DtRadio v-model="plan" value="free" name="plan">Free</DtRadio>
-          <DtRadio v-model="plan" value="pro" name="plan">Pro</DtRadio>
+        <div v-if="groupTab === 'preview'" class="dx-preview dx-preview--column">
+          <DtRadio v-model="plan" value="free"       name="plan">Free</DtRadio>
+          <DtRadio v-model="plan" value="pro"        name="plan">Pro</DtRadio>
           <DtRadio v-model="plan" value="enterprise" name="plan">Enterprise</DtRadio>
-          <DtRadio :model-value="''" value="disabled" name="plan" disabled>Disabled</DtRadio>
         </div>
         <CodeBlock v-else :code="groupCode" lang="vue" />
       </div>
@@ -70,12 +101,44 @@ const propsRows = [
       <h2>Sizes</h2>
       <DtTabSwitcher v-model="sizesTab" :tabs="tabs" />
       <div class="dx-tab-panel">
-        <div v-if="sizesTab === 'preview'" class="dx-preview">
-          <DtRadio v-model="sizesPlan" value="free" name="p-lg" size="lg">Large</DtRadio>
-          <DtRadio v-model="sizesPlan" value="pro" name="p-md" size="md">Medium</DtRadio>
-          <DtRadio v-model="sizesPlan" value="enterprise" name="p-sm" size="sm">Small</DtRadio>
+        <div v-if="sizesTab === 'preview'" class="dx-preview dx-preview--column">
+          <DtRadio v-model="sizesPlan" value="a" name="sz-sm" size="sm">Small</DtRadio>
+          <DtRadio v-model="sizesPlan" value="b" name="sz-md" size="md">Medium</DtRadio>
+          <DtRadio v-model="sizesPlan" value="c" name="sz-lg" size="lg">Large</DtRadio>
         </div>
         <CodeBlock v-else :code="sizesCode" lang="vue" />
+      </div>
+
+      <h2>Label + description</h2>
+      <DtTabSwitcher v-model="descriptionTab" :tabs="tabs" />
+      <div class="dx-tab-panel">
+        <div v-if="descriptionTab === 'preview'" class="dx-preview dx-preview--column">
+          <DtRadio
+            v-model="descriptionPlan"
+            value="free"
+            name="plan-desc"
+            label="Free"
+            description="Core features for personal projects."
+          />
+          <DtRadio
+            v-model="descriptionPlan"
+            value="pro"
+            name="plan-desc"
+            label="Pro"
+            description="All features, priority support, 30-day trial."
+          />
+        </div>
+        <CodeBlock v-else :code="descriptionCode" lang="vue" />
+      </div>
+
+      <h2>Disabled</h2>
+      <DtTabSwitcher v-model="stateTab" :tabs="tabs" />
+      <div class="dx-tab-panel">
+        <div v-if="stateTab === 'preview'" class="dx-preview dx-preview--column">
+          <DtRadio value="off" name="dis" disabled>Disabled</DtRadio>
+          <DtRadio :model-value="'on'" value="on" name="dis" disabled>Disabled (selected)</DtRadio>
+        </div>
+        <CodeBlock v-else :code="stateCode" lang="vue" />
       </div>
 
       <h2>Props</h2>
@@ -86,12 +149,25 @@ const propsRows = [
         <template #desc="{ item }">{{ (item as { desc: string }).desc }}</template>
       </DtDataTable>
 
+      <h2>Slots</h2>
+      <DtDataTable :columns="slotsCols" :items="slotsRows">
+        <template #name="{ item }"><code>{{ (item as { name: string }).name }}</code></template>
+        <template #desc="{ item }">{{ (item as { desc: string }).desc }}</template>
+      </DtDataTable>
+
       <h2>Accessibility</h2>
       <ul>
-        <li>Native <code>&lt;input type="radio"&gt;</code> hidden for visual styling, present for form submission.</li>
-        <li>Pass the same <code>name</code> to group radios — keyboard arrow keys navigate within the group.</li>
-        <li>Visible focus ring on <code>:focus-visible</code>.</li>
+        <li>Hidden native <code>&lt;input type="radio"&gt;</code> — Tab to focus the group, Arrow keys to switch within it.</li>
+        <li>Pass the same <code>name</code> to group radios for native exclusive selection.</li>
+        <li>Focus ring uses <code>:focus-visible</code> so it only shows on keyboard focus.</li>
+        <li>Click anywhere on the label (or description) selects the radio.</li>
       </ul>
     </div>
   </DtPageView>
 </template>
+
+<style scoped>
+.dx-preview--column {
+  align-items: flex-start;
+}
+</style>

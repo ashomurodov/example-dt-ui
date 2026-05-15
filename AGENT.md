@@ -1577,6 +1577,125 @@ const services = [
 
 ---
 
+# DtBadgeGroup
+
+Compound announcement badge: a small colored pill (or modern outline badge with a dot) paired with body text and an optional trailing arrow. Used for release banners, status callouts, and inline notifications. Renders as `<a>` when `href` is set, otherwise as a `<div>`.
+
+## Import
+
+```ts
+import { DtBadgeGroup } from '@/components/ui/badge-group'
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `color` | `'gray' \| 'brand' \| 'error' \| 'warning' \| 'success'` | `'gray'` | Color family. |
+| `type` | `'pill' \| 'modern'` | `'pill'` | `pill` fills the outer with the color; `modern` keeps it white and uses a colored dot. |
+| `size` | `'md' \| 'lg'` | `'md'` | `md` uses body-xs typography; `lg` uses body-sm and a slightly taller inner pill. |
+| `position` | `'leading' \| 'trailing'` | `'leading'` | `leading` places the pill on the left; `trailing` places it on the right with the arrow inside it. |
+| `label` | `string` | — | Pill / badge text. |
+| `text` | `string` | — | Body text. |
+| `href` | `string` | — | If provided, renders as `<a>`. |
+| `target` | `'_self' \| '_blank' \| '_parent' \| '_top'` | — | Forwarded to the `<a>`. When `_blank`, `rel="noopener noreferrer"` is added automatically. |
+| `arrow` | `boolean` | `true` | Show the trailing arrow icon. |
+
+## Slots
+
+| Slot | Description |
+| ------ | ------------- |
+| `default` | Body text. Overrides `text`. |
+| `label` | Pill / badge content. Overrides `label`. |
+| `arrow` | Custom trailing icon. Replaces the built-in arrow. |
+
+## Examples
+
+### Leading pill (default)
+
+```vue
+<DtBadgeGroup label="Version 4.0" text="We've just released a new feature" href="/changelog" />
+```
+
+### Trailing pill
+
+```vue
+<DtBadgeGroup
+  position="trailing"
+  label="Version 4.0"
+  text="We've just released a new feature"
+  href="/changelog"
+/>
+```
+
+### Modern type (white container, colored dot)
+
+```vue
+<DtBadgeGroup
+  type="modern"
+  color="success"
+  label="Success"
+  text="You've updated your profile"
+/>
+```
+
+### Color variants (pill type)
+
+```vue
+<DtBadgeGroup color="brand"   label="New feature" text="We've just released a new feature" />
+<DtBadgeGroup color="error"   label="Error"       text="There was a problem with that action" />
+<DtBadgeGroup color="warning" label="Warning"     text="Just to let you know this might be a problem" />
+<DtBadgeGroup color="success" label="Success"     text="You've updated your profile and details" />
+```
+
+### lg size
+
+```vue
+<DtBadgeGroup size="lg" color="brand" label="New feature" text="Updated profile picker" />
+```
+
+### Hide the arrow
+
+```vue
+<DtBadgeGroup label="Version 4.0" text="Release notes inline" :arrow="false" />
+```
+
+### Custom label / arrow
+
+```vue
+<DtBadgeGroup color="brand" text="Check it out">
+  <template #label>
+    <SparkleIcon :size="12" />
+    New
+  </template>
+</DtBadgeGroup>
+```
+
+## CSS Custom Properties
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-color-background` | Modern type outer + inner pill background. |
+| `--dt-color-border` | Default outer/inner border (gray / modern). |
+| `--dt-shadow-xs` | Drop shadow on both outer and inner pill. |
+| `--dt-radius-full` | Pill type radius. |
+| `--dt-radius-sm` / `--dt-radius-xs` | Modern type outer / inner radius. |
+| `--dt-gray-50` / `--dt-gray-100` | Gray pill default / hover background. |
+| `--dt-gray-300` | Modern type dot for `color="gray"`. |
+| `--dt-gray-600` / `--dt-gray-700` | Pill label / body text in gray and modern. |
+| `--dt-brand-50` / `--dt-brand-100` / `--dt-brand-200` / `--dt-brand-500` / `--dt-brand-600` | Brand color family. |
+| `--dt-error-*`, `--dt-warning-*`, `--dt-success-*` | Same scale stops for the other three colors. |
+| `--dt-text-body-xs` / `--dt-text-body-sm` | md / lg font sizes. |
+| `--dt-color-ring` | Focus ring when used as an `<a>`. |
+
+## Accessibility
+
+- Renders a real `<a>` when `href` is set — keyboard-focusable, native semantics, visible focus ring.
+- Dot and arrow icons are marked `aria-hidden` — text content carries the meaning.
+- When `target="_blank"` is set, the component adds `rel="noopener noreferrer"` automatically.
+
+---
+
 # DtAvatar
 
 Circular avatar with image, initials, or user-icon fallback. Six sizes (24/32/40/48/56/64px), an optional outer ring, and an optional status indicator at the bottom-right corner.
@@ -1837,7 +1956,7 @@ Built-in hover (tinted background + darker border), `:focus-visible` ring at `--
 
 # DtRadio
 
-A radio button component with 3 sizes (lg/md/sm), animated selection dot, and label slot. Uses a hidden native `<input type="radio">` for accessibility. Group multiple radios with the same `name` prop.
+Radio button with three sizes, optional description text, and full keyboard/focus support. Wraps a visually-hidden `<input type="radio">` for native group behavior. Group multiple radios with the same `name` prop.
 
 ## Import
 
@@ -1851,28 +1970,33 @@ import { DtRadio } from '@/components/ui/radio'
 | ------ | ------ | --------- | ------------- |
 | `modelValue` | `string \| number` | — | Currently selected value in the group. Use with `v-model`. |
 | `value` | `string \| number` | **required** | This radio's value. |
-| `size` | `'lg' \| 'md' \| 'sm'` | `'md'` | Radio size. |
-| `disabled` | `boolean` | `false` | Disables the radio. |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Circle: 16 / 20 / 24 px. |
+| `disabled` | `boolean` | `false` | Native disabled state. |
 | `name` | `string` | — | Group name for native radio behavior. |
+| `label` | `string` | — | Inline label text. Default slot wins if both are provided. |
+| `description` | `string` | — | Secondary text rendered under the label. |
+| `id` | `string` | auto | HTML id for `<label for>` association. |
 
 ## Events
 
 | Event | Payload | Description |
 | ------- | --------- | ------------- |
-| `update:modelValue` | `string \| number` | Emitted when selected. |
+| `update:modelValue` | `string \| number` | Standard v-model. |
 
-## Sizes
+## Slots
 
-| Size | Circle | Inner Dot |
-| ------ | -------- | ----------- |
-| `lg` | 24x24px | 10px |
-| `md` | 20x20px | 8px |
-| `sm` | 16x16px | 6px |
+| Slot | Description |
+| ------ | ------------- |
+| `default` | Label content. Overrides the `label` prop. |
+| `description` | Description content. Overrides the `description` prop. |
 
 ## Usage
 
+### Basic group
+
 ```vue
 <script setup>
+import { ref } from 'vue'
 const plan = ref('free')
 </script>
 
@@ -1883,18 +2007,81 @@ const plan = ref('free')
 </template>
 ```
 
+### Label + description
+
+```vue
+<DtRadio
+  v-model="plan"
+  value="pro"
+  name="plan"
+  label="Pro"
+  description="All features, priority support, 30-day trial."
+/>
+```
+
+Or via slots:
+
+```vue
+<DtRadio v-model="plan" value="pro" name="plan">
+  Pro
+  <template #description>All features, priority support, 30-day trial.</template>
+</DtRadio>
+```
+
+### Sizes
+
+```vue
+<DtRadio size="sm" v-model="x" value="a" name="g">Small</DtRadio>
+<DtRadio size="md" v-model="x" value="b" name="g">Medium</DtRadio>
+<DtRadio size="lg" v-model="x" value="c" name="g">Large</DtRadio>
+```
+
+### Disabled
+
+```vue
+<DtRadio disabled value="x" name="g">Off</DtRadio>
+<DtRadio disabled v-model="model" value="x" name="g">On</DtRadio>
+```
+
 ## States
 
-- **Unselected**: `--dt-gray-200` background
-- **Hover**: `--dt-gray-300` background
-- **Selected**: `--dt-color-accent` background, white dot (animated pop)
-- **Disabled**: `--dt-gray-100` background, muted label
+| State | Visual |
+| ----- | ------ |
+| Default (unselected) | White bg + 1.5px `--dt-color-border-hover` outline |
+| Hover (unselected) | Outline → `--dt-color-accent-hover` |
+| Focus | Outer 2px `--dt-color-accent` ring at 5px offset |
+| Selected | bg + border `--dt-color-accent`, white dot (animated pop) |
+| Selected + hover | bg + border `--dt-color-accent-hover` |
+| Disabled (unselected) | bg `--dt-gray-200`, outline `--dt-color-border-hover` |
+| Disabled (selected) | bg + border `--dt-brand-200` |
+
+## CSS Custom Properties
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-color-background` | Default unselected circle background. |
+| `--dt-color-border-hover` | Default outline color (gray-300). |
+| `--dt-color-accent` / `--dt-color-accent-hover` | Selected fill + hover. |
+| `--dt-brand-200` | Disabled-selected fill. |
+| `--dt-gray-200` | Disabled-unselected fill. |
+| `--dt-radius-full` | Circle radius. |
+| `--dt-color-white` | Inner dot. |
+| `--dt-gray-700` / `--dt-gray-600` | Label / description text. |
+| `--dt-color-text-disabled` | Disabled label + description. |
+
+## Accessibility
+
+- Native `<input type="radio">` under the hood — Tab to focus the group, Arrow keys to switch within it, native form integration.
+- `<label for>` association via the auto-generated `id` (override with `id`).
+- Focus ring uses `:focus-visible` so it only shows on keyboard focus, not mouse clicks.
+- Click anywhere on the label (including description) selects the radio.
+- Group multiple radios with the same `name` for native exclusive-selection behavior.
 
 ---
 
 # DtCheckbox
 
-A checkbox component with 3 sizes (lg/md/sm), animated checkmark, and label slot. Uses a hidden native `<input type="checkbox">` for accessibility.
+Checkbox with three sizes, indeterminate state, optional description text, and full keyboard/focus support. Wraps a visually-hidden `<input type="checkbox">` for native form integration.
 
 ## Import
 
@@ -1907,44 +2094,111 @@ import { DtCheckbox } from '@/components/ui/checkbox'
 | Prop | Type | Default | Description |
 | ------ | ------ | --------- | ------------- |
 | `modelValue` | `boolean` | `false` | Checked state. Use with `v-model`. |
-| `size` | `'lg' \| 'md' \| 'sm'` | `'md'` | Checkbox size. |
-| `disabled` | `boolean` | `false` | Disables the checkbox. |
-| `id` | `string` | auto-generated | HTML id for label association. |
+| `indeterminate` | `boolean` | `false` | Visual partially-checked state. Renders a horizontal dash glyph instead of the checkmark. Doesn't change `modelValue` — caller decides when to clear it. |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Box: 16 / 20 / 24 px. |
+| `disabled` | `boolean` | `false` | Native disabled state. |
+| `label` | `string` | — | Inline label text. Default slot wins if both are provided. |
+| `description` | `string` | — | Secondary text rendered under the label. |
+| `id` | `string` | auto | HTML id for `<label for>` association. |
 
 ## Events
 
 | Event | Payload | Description |
 | ------- | --------- | ------------- |
-| `update:modelValue` | `boolean` | Emitted when toggled. |
+| `update:modelValue` | `boolean` | Standard v-model. |
 
 ## Slots
 
 | Slot | Description |
 | ------ | ------------- |
-| `default` | Label text next to the checkbox. |
-
-## Sizes
-
-| Size | Box | Check Icon |
-| ------ | ----- | ------------ |
-| `lg` | 24x24px | 14px |
-| `md` | 20x20px | 12px |
-| `sm` | 16x16px | 10px |
+| `default` | Label content. Overrides the `label` prop. |
+| `description` | Description content. Overrides the `description` prop. |
 
 ## Usage
 
+### Basic
+
 ```vue
 <DtCheckbox v-model="agreed">I agree to the terms</DtCheckbox>
-<DtCheckbox v-model="agreed" size="lg" />
-<DtCheckbox v-model="agreed" disabled>Disabled</DtCheckbox>
+```
+
+### Indeterminate
+
+Typical use: a parent "select all" that's mixed when only some children are checked.
+
+```vue
+<DtCheckbox v-model="all" :indeterminate="some && !all">Select all</DtCheckbox>
+```
+
+The `indeterminate` flag is purely visual — the parent component decides when to flip it back off based on its child state.
+
+### Label + description
+
+```vue
+<DtCheckbox
+  v-model="remember"
+  label="Remember me"
+  description="Save my login details for next time."
+/>
+```
+
+Or via slots:
+
+```vue
+<DtCheckbox v-model="remember">
+  Remember me
+  <template #description>Save my login details for next time.</template>
+</DtCheckbox>
+```
+
+### Sizes
+
+```vue
+<DtCheckbox size="sm" v-model="x">Small</DtCheckbox>
+<DtCheckbox size="md" v-model="x">Medium</DtCheckbox>
+<DtCheckbox size="lg" v-model="x">Large</DtCheckbox>
+```
+
+### Disabled
+
+```vue
+<DtCheckbox disabled>Off</DtCheckbox>
+<DtCheckbox disabled :model-value="true">On</DtCheckbox>
+<DtCheckbox disabled indeterminate>Mixed</DtCheckbox>
 ```
 
 ## States
 
-- **Unchecked**: `--dt-gray-200` background
-- **Hover**: `--dt-gray-300` background
-- **Checked**: `--dt-color-accent` background, white checkmark
-- **Disabled**: `--dt-gray-100` background, muted label
+| State | Visual |
+| ----- | ------ |
+| Default (unchecked) | White bg + 1.5px `--dt-color-border-hover` outline |
+| Hover (unchecked) | Outline → `--dt-color-accent-hover` |
+| Focus | Outer 2px `--dt-color-accent` ring at 5px offset |
+| Checked / Indeterminate | bg + border `--dt-color-accent`, white glyph |
+| Checked + hover | bg + border `--dt-color-accent-hover` |
+| Disabled (unchecked) | bg `--dt-gray-200`, outline `--dt-color-border-hover` |
+| Disabled (checked / indeterminate) | bg + border `--dt-brand-200` |
+
+## CSS Custom Properties
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-color-background` | Default unchecked box background. |
+| `--dt-color-border-hover` | Default outline color (gray-300). |
+| `--dt-color-accent` / `--dt-color-accent-hover` | Checked / indeterminate fill + hover. |
+| `--dt-brand-200` | Disabled-checked fill. |
+| `--dt-gray-200` | Disabled-unchecked fill. |
+| `--dt-radius-xs` | Box radius (6px). |
+| `--dt-gray-700` / `--dt-gray-600` | Label / description text. |
+| `--dt-color-text-disabled` | Disabled label + description. |
+
+## Accessibility
+
+- Native `<input type="checkbox">` under the hood — full keyboard support (Tab to focus, Space to toggle), form integration, and screen-reader semantics for free.
+- `<label for>` association via the auto-generated `id` (override with the `id` prop).
+- `aria-checked="mixed"` is set when `indeterminate` is true.
+- Focus ring uses `:focus-visible` so it only appears on keyboard focus, not mouse clicks.
+- Click anywhere on the label (including the description) toggles the checkbox.
 
 ---
 
@@ -2102,49 +2356,60 @@ Reka UI provides the select-only combobox/listbox behavior: ARIA roles and state
 
 # DtInput
 
-A text input component with built-in label, error message, and hint text support. Wraps a native `<input>` element and provides two-way binding through `v-model`. Automatically links the label and error/hint text to the input using generated or user-supplied `id` values for proper accessibility.
+Text input with two visual variants, four sizes, validation states (error / success), top or floating label, optional clear button, and `prefix` / `suffix` slots for icons and adornments. Wraps a native `<input>` and forwards all attributes via `$attrs`.
+
+The same package ships:
+
+- **`DtInput`** — the base component.
+- **`DtPhoneInput`** — country flag + dial code + masked national number (UZ default, RU/KZ/KG/TJ also built-in).
+- **`DtPaymentInput`** — card-number input with 4-digit grouping and built-in brand detection (Visa / Mastercard / Amex / UzCard / Humo).
 
 ## Import
 
 ```ts
-import { DtInput } from '@/components/ui/input'
+import {
+  DtInput,
+  DtPhoneInput,
+  DtPaymentInput,
+  type PhoneValue,
+  type CardBrand,
+} from '@/components/ui/input'
 ```
 
-## Props
+## DtInput props
 
 | Prop | Type | Default | Description |
 | ------ | ------ | --------- | ------------- |
-| `modelValue` | `string \| number` | `undefined` | The bound value. Use with `v-model`. |
-| `type` | `InputType` | `'text'` | The native input type. |
-| `placeholder` | `string` | `undefined` | Placeholder text shown when the input is empty. |
-| `disabled` | `boolean` | `false` | Disables the input (reduces opacity, sets `cursor: not-allowed`, and applies `--dt-color-background-tertiary` background). |
-| `error` | `string` | `undefined` | Error message text. When set, the input border turns red and the error message is displayed below the input. |
-| `hint` | `string` | `undefined` | Hint text displayed below the input. Only shown when `error` is not set. |
-| `id` | `string` | auto-generated | HTML `id` for the input element. If not provided, a random id (`dt-input-*`) is generated. Used to associate the label and describedby elements. |
+| `modelValue` | `string \| number` | — | Bound value (v-model). |
+| `type` | `string` | `'text'` | Native input type (text/email/password/number/search/tel/url/…). |
+| `variant` | `'primary' \| 'secondary'` | `'primary'` | Primary = white background with border. Secondary = filled, borderless until focus. |
+| `size` | `'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'` | Height: 48 / 56 / 64 / 72 px. |
+| `label` | `string` | — | Label text. String-only — for custom markup, wrap externally. |
+| `labelPosition` | `'top' \| 'floating'` | `'top'` | `top` = external label above the field. `floating` = label sits inside, animates up on focus or when filled. |
+| `state` | `'error' \| 'success' \| undefined` | `undefined` | Validation state. Drives border color and message color. |
+| `message` | `string` | — | Helper / error / success message rendered below the field. |
+| `placeholder` | `string` | — | Native placeholder. Ignored visually when `labelPosition="floating"`. |
+| `disabled` | `boolean` | `false` | Native disabled. |
+| `clearable` | `boolean` | `false` | Shows a × button when the field has a value. Emits `clear` and clears `modelValue`. |
+| `id` | `string` | auto | HTML id for `<label for>` association. |
 
-### Type Reference
-
-```ts
-type InputType = 'text' | 'email' | 'password' | 'number' | 'search' | 'tel' | 'url'
-```
-
-## Slots
-
-| Slot | Description |
-| ------ | ------------- |
-| `label` | Content for the `<label>` element above the input. The label automatically receives a `for` attribute pointing to the input `id`. If this slot is empty, no label is rendered. |
-
-## Events
+## DtInput events
 
 | Event | Payload | Description |
 | ------- | --------- | ------------- |
-| `update:modelValue` | `string \| number` | Emitted on every input event. When `type="number"`, the value is coerced to `Number` before emitting. |
+| `update:modelValue` | `string \| number` | Standard v-model. |
+| `clear` | — | Fires when the × button is clicked. |
 
-All other native input events (`focus`, `blur`, `keydown`, etc.) are forwarded through `v-bind="attrs"` on the `<input>` element.
+## DtInput slots
 
-## Usage Examples
+| Slot | Description |
+| ------ | ------------- |
+| `prefix` | Leading adornment (icon, currency symbol, country flag, etc.). |
+| `suffix` | Trailing adornment (icon, unit, brand logo, etc.). |
 
-### Basic Text Input
+## Usage
+
+### Basic
 
 ```vue
 <script setup lang="ts">
@@ -2155,119 +2420,191 @@ const name = ref('')
 </script>
 
 <template>
-  <DtInput v-model="name" placeholder="Enter your name">
-    <template #label>Full Name</template>
-  </DtInput>
+  <DtInput v-model="name" label="Full name" placeholder="Your name" />
 </template>
 ```
 
-### Input with Validation Error and Hint
+### Variants and sizes
 
 ```vue
-<script setup lang="ts">
-import { ref, computed } from 'vue'
-import { DtInput } from '@/components/ui/input'
+<DtInput v-model="text" variant="primary"   label="Primary" />
+<DtInput v-model="text" variant="secondary" label="Secondary" />
 
-const email = ref('')
-
-const emailError = computed(() => {
-  if (!email.value) return undefined
-  return email.value.includes('@') ? undefined : 'Please enter a valid email address'
-})
-</script>
-
-<template>
-  <DtInput
-    v-model="email"
-    type="email"
-    placeholder="you@example.com"
-    :error="emailError"
-    hint="We will never share your email with anyone."
-  >
-    <template #label>Email Address</template>
-  </DtInput>
-</template>
+<DtInput v-model="text" size="sm" label="Small (48px)" />
+<DtInput v-model="text" size="md" label="Medium (56px)" />
+<DtInput v-model="text" size="lg" label="Large (64px)" />
+<DtInput v-model="text" size="xl" label="Extra Large (72px)" />
 ```
 
-### Composed with DtCard and DtButton for a Login Form
+### Floating label
+
+```vue
+<DtInput
+  v-model="email"
+  label="Email"
+  label-position="floating"
+  type="email"
+/>
+```
+
+CSS-only animation driven by `:placeholder-shown` + `:focus`. No JS, no flicker.
+
+### Validation
+
+```vue
+<DtInput v-model="email" label="Email"
+         state="error"
+         message="That doesn't look like a valid email" />
+
+<DtInput v-model="email" label="Email"
+         state="success"
+         message="Looks good" />
+
+<DtInput v-model="email" label="Hint"
+         message="At least 3 characters" />
+```
+
+`state` drives border and message color. `message` works in all three modes (hint / error / success).
+
+### Adornments
+
+```vue
+<DtInput v-model="search" label="Search" clearable>
+  <template #prefix>
+    <SearchIcon :size="18" />
+  </template>
+</DtInput>
+
+<DtInput v-model="text" label="Website">
+  <template #prefix><span>https://</span></template>
+  <template #suffix><span>.com</span></template>
+</DtInput>
+```
+
+## DtPhoneInput
+
+Composes `DtInput` with a country prefix dropdown and per-country mask.
+
+### Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `modelValue` | `PhoneValue \| string` | — | `{ e164, country, national }` object or a raw E.164 string. Emits a `PhoneValue`. |
+| `defaultCountry` | `'UZ' \| 'RU' \| 'KZ' \| 'KG' \| 'TJ'` | `'UZ'` | Initial selected country. |
+| `allowedCountries` | `Array<…>` | all 5 | Restricts the dropdown. Pass `['UZ']` to lock the prefix entirely. |
+| ... | | | All other `DtInput` props are forwarded (`variant`, `size`, `label`, `labelPosition`, `state`, `message`, `disabled`). |
+
+### `PhoneValue`
+
+```ts
+interface PhoneValue {
+  /** Full international number, e.g. '+998901234567' (no spaces/parens). */
+  e164: string
+  /** ISO code of the selected country. */
+  country: 'UZ' | 'RU' | 'KZ' | 'KG' | 'TJ'
+  /** Masked national portion, e.g. '(90) 123 45 67'. */
+  national: string
+}
+```
+
+### Usage
 
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
-import { DtInput } from '@/components/ui/input'
-import { DtButton } from '@/components/ui/button'
-import { DtCard, DtCardHeader, DtCardContent, DtCardFooter } from '@/components/ui/card'
+import { DtPhoneInput, type PhoneValue } from '@/components/ui/input'
 
-const email = ref('')
-const password = ref('')
-const loading = ref(false)
-
-async function submit() {
-  loading.value = true
-  // ... perform login
-  loading.value = false
-}
+const phone = ref<PhoneValue>({ e164: '', country: 'UZ', national: '' })
 </script>
 
 <template>
-  <DtCard :shadow="true" style="max-width: 24rem;">
-    <DtCardHeader>
-      <h3>Sign In</h3>
-      <p>Enter your credentials to access your account.</p>
-    </DtCardHeader>
-    <DtCardContent>
-      <div style="display: flex; flex-direction: column; gap: 1rem;">
-        <DtInput v-model="email" type="email" placeholder="you@example.com">
-          <template #label>Email</template>
-        </DtInput>
-        <DtInput v-model="password" type="password" placeholder="Your password">
-          <template #label>Password</template>
-        </DtInput>
-      </div>
-    </DtCardContent>
-    <DtCardFooter>
-      <DtButton :loading="loading" style="width: 100%;" @click="submit">
-        Sign In
-      </DtButton>
-    </DtCardFooter>
-  </DtCard>
+  <DtPhoneInput v-model="phone" label="Phone number" />
+</template>
+```
+
+When the user picks a different country the digits-only payload is preserved and reformatted with the new country's mask.
+
+## DtPaymentInput
+
+Composes `DtInput` with 4-digit grouping and brand detection. The brand-icon itself is **not shipped** — provide your own SVG/img via the `#brand` slot.
+
+### Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `modelValue` | `string` | — | Formatted card number (with spaces). v-model. |
+| `maxDigits` | `number` | `16` | Max digits accepted. Use `15` for Amex-only forms. |
+| ... | | | All other `DtInput` props are forwarded. |
+
+### Events
+
+| Event | Payload | Description |
+| ------- | --------- | ------------- |
+| `update:modelValue` | `string` | Fires with the formatted (spaced) value on every keystroke. |
+| `brand-change` | `CardBrand` | Fires only when the detected brand changes. |
+
+### `CardBrand`
+
+```ts
+type CardBrand = 'visa' | 'mastercard' | 'amex' | 'uzcard' | 'humo' | 'unknown'
+```
+
+Detection rules:
+
+- **Visa** — starts with `4`
+- **Mastercard** — `51`–`55` or `2221`–`2720`
+- **Amex** — `34` or `37`
+- **UzCard** — `8600`, `5614`, or `6262`
+- **Humo** — `9860`
+
+### Usage
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { DtPaymentInput, type CardBrand } from '@/components/ui/input'
+
+const card = ref('')
+const brand = ref<CardBrand>('unknown')
+</script>
+
+<template>
+  <DtPaymentInput v-model="card" label="Card number"
+                  @brand-change="(b) => brand = b">
+    <template #brand="{ brand }">
+      <img v-if="brand === 'visa'"       src="/brands/visa.svg"       alt="Visa" />
+      <img v-else-if="brand === 'mastercard'" src="/brands/mc.svg"    alt="Mastercard" />
+      <span v-else aria-hidden="true">💳</span>
+    </template>
+  </DtPaymentInput>
 </template>
 ```
 
 ## CSS Custom Properties
 
-### Colors
-
 | Property | Usage |
 | ---------- | ------- |
-| `--dt-color-text` | Input text color and label color. |
-| `--dt-color-background` | Input background color. |
-| `--dt-color-background-tertiary` | Disabled input background color. |
-| `--dt-color-text-secondary` | Placeholder text color and hint text color. |
-| `--dt-color-border` | Default border color. |
-| `--dt-color-border-hover` | Border color on hover. |
-| `--dt-color-ring` | Border and box-shadow color on focus. |
-| `--dt-color-error` | Border and box-shadow color when `error` is set. Also used for error text color. |
-
-### Layout & Typography
-
-| Property | Usage |
-| ---------- | ------- |
-| `--dt-spacing-xs` | Gap between label, input, and error/hint elements. |
-| `--dt-radius-sm` | Input border-radius. |
-| `--dt-text-body-xs` | Error and hint text font size. |
-| `--dt-text-body-sm` | Label font size. |
-| `--dt-text-body-md` | Input text font size. |
-| `--dt-transition-base` | Duration/easing for border-color and box-shadow transitions. |
+| `--dt-color-background` | Primary variant background. |
+| `--dt-color-background-tertiary` | Secondary variant background. |
+| `--dt-color-border` | Idle border (primary). |
+| `--dt-color-border-hover` | Hover border (primary). |
+| `--dt-color-accent` | Focus border + floating label color when focused. |
+| `--dt-brand-100` | 3px focus ring. |
+| `--dt-color-error` / `--dt-error-100` | Error border + ring. |
+| `--dt-color-success` / `--dt-success-100` | Success border + ring. |
+| `--dt-color-text` / `--dt-color-text-secondary` / `--dt-color-text-tertiary` | Value text / labels / placeholder. |
+| `--dt-color-text-disabled` | Disabled value + placeholder. |
+| `--dt-radius-md` / `lg` / `xl` | Per-size radius. |
+| `--dt-text-body-sm` / `body-md` | Per-size font. |
 
 ## Accessibility
 
-- The `<label>` element uses a `for` attribute linked to the input `id`, providing a clickable label that focuses the input.
-- When `error` is set, `aria-invalid="true"` is added to the input, signaling the invalid state to assistive technologies.
-- The `aria-describedby` attribute is dynamically set to point at either the error element (id: `{id}-error`) or the hint element (id: `{id}-hint`), so screen readers announce the supplementary text when the input is focused.
-- Error messages are rendered with `role="alert"`, causing screen readers to announce them immediately when they appear.
-- The disabled state uses both the native `disabled` attribute and an opacity wrapper class, ensuring the input is removed from the tab order.
-- Focus styles use a visible box-shadow ring (`color-mix(in srgb, var(--dt-ring) 25%, transparent)`) in addition to the border color change, providing a clear visual indicator for keyboard users.
+- Native `<input>` + `<label for>` association via `id`.
+- `aria-invalid="true"` set when `state="error"`.
+- `aria-describedby` connects the `message` line to the input.
+- Floating label is CSS-only — no flicker, no JS state leak.
+- Phone dropdown uses real `role="listbox"` + `aria-selected` on options.
+- Clear button has an `aria-label="Clear"`.
 
 ---
 

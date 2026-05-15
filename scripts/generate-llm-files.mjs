@@ -56,6 +56,7 @@ const COMPONENTS = [
   { slug: 'layout', title: 'DtLayout (bundle)', group: 'Navigation' },
   // Overlay
   { slug: 'dialog', title: 'DtDialog', group: 'Overlay' },
+  { slug: 'dropdown-menu', title: 'DtDropdownMenu', group: 'Overlay' },
 ]
 
 function read(file) {

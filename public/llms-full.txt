@@ -969,7 +969,7 @@ import { DtToggle } from '@/components/ui/toggle'
 <!-- slug: checkbox  ·  group: Form -->
 # DtCheckbox
 
-A checkbox component with 3 sizes (lg/md/sm), animated checkmark, and label slot. Uses a hidden native `<input type="checkbox">` for accessibility.
+Checkbox with three sizes, indeterminate state, optional description text, and full keyboard/focus support. Wraps a visually-hidden `<input type="checkbox">` for native form integration.
 
 ## Import
 
@@ -982,51 +982,118 @@ import { DtCheckbox } from '@/components/ui/checkbox'
 | Prop | Type | Default | Description |
 | ------ | ------ | --------- | ------------- |
 | `modelValue` | `boolean` | `false` | Checked state. Use with `v-model`. |
-| `size` | `'lg' \| 'md' \| 'sm'` | `'md'` | Checkbox size. |
-| `disabled` | `boolean` | `false` | Disables the checkbox. |
-| `id` | `string` | auto-generated | HTML id for label association. |
+| `indeterminate` | `boolean` | `false` | Visual partially-checked state. Renders a horizontal dash glyph instead of the checkmark. Doesn't change `modelValue` — caller decides when to clear it. |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Box: 16 / 20 / 24 px. |
+| `disabled` | `boolean` | `false` | Native disabled state. |
+| `label` | `string` | — | Inline label text. Default slot wins if both are provided. |
+| `description` | `string` | — | Secondary text rendered under the label. |
+| `id` | `string` | auto | HTML id for `<label for>` association. |
 
 ## Events
 
 | Event | Payload | Description |
 | ------- | --------- | ------------- |
-| `update:modelValue` | `boolean` | Emitted when toggled. |
+| `update:modelValue` | `boolean` | Standard v-model. |
 
 ## Slots
 
 | Slot | Description |
 | ------ | ------------- |
-| `default` | Label text next to the checkbox. |
-
-## Sizes
-
-| Size | Box | Check Icon |
-| ------ | ----- | ------------ |
-| `lg` | 24x24px | 14px |
-| `md` | 20x20px | 12px |
-| `sm` | 16x16px | 10px |
+| `default` | Label content. Overrides the `label` prop. |
+| `description` | Description content. Overrides the `description` prop. |
 
 ## Usage
 
+### Basic
+
 ```vue
 <DtCheckbox v-model="agreed">I agree to the terms</DtCheckbox>
-<DtCheckbox v-model="agreed" size="lg" />
-<DtCheckbox v-model="agreed" disabled>Disabled</DtCheckbox>
+```
+
+### Indeterminate
+
+Typical use: a parent "select all" that's mixed when only some children are checked.
+
+```vue
+<DtCheckbox v-model="all" :indeterminate="some && !all">Select all</DtCheckbox>
+```
+
+The `indeterminate` flag is purely visual — the parent component decides when to flip it back off based on its child state.
+
+### Label + description
+
+```vue
+<DtCheckbox
+  v-model="remember"
+  label="Remember me"
+  description="Save my login details for next time."
+/>
+```
+
+Or via slots:
+
+```vue
+<DtCheckbox v-model="remember">
+  Remember me
+  <template #description>Save my login details for next time.</template>
+</DtCheckbox>
+```
+
+### Sizes
+
+```vue
+<DtCheckbox size="sm" v-model="x">Small</DtCheckbox>
+<DtCheckbox size="md" v-model="x">Medium</DtCheckbox>
+<DtCheckbox size="lg" v-model="x">Large</DtCheckbox>
+```
+
+### Disabled
+
+```vue
+<DtCheckbox disabled>Off</DtCheckbox>
+<DtCheckbox disabled :model-value="true">On</DtCheckbox>
+<DtCheckbox disabled indeterminate>Mixed</DtCheckbox>
 ```
 
 ## States
 
-- **Unchecked**: `--dt-gray-200` background
-- **Hover**: `--dt-gray-300` background
-- **Checked**: `--dt-color-accent` background, white checkmark
-- **Disabled**: `--dt-gray-100` background, muted label
+| State | Visual |
+| ----- | ------ |
+| Default (unchecked) | White bg + 1.5px `--dt-color-border-hover` outline |
+| Hover (unchecked) | Outline → `--dt-color-accent-hover` |
+| Focus | Outer 2px `--dt-color-accent` ring at 5px offset |
+| Checked / Indeterminate | bg + border `--dt-color-accent`, white glyph |
+| Checked + hover | bg + border `--dt-color-accent-hover` |
+| Disabled (unchecked) | bg `--dt-gray-200`, outline `--dt-color-border-hover` |
+| Disabled (checked / indeterminate) | bg + border `--dt-brand-200` |
+
+## CSS Custom Properties
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-color-background` | Default unchecked box background. |
+| `--dt-color-border-hover` | Default outline color (gray-300). |
+| `--dt-color-accent` / `--dt-color-accent-hover` | Checked / indeterminate fill + hover. |
+| `--dt-brand-200` | Disabled-checked fill. |
+| `--dt-gray-200` | Disabled-unchecked fill. |
+| `--dt-radius-xs` | Box radius (6px). |
+| `--dt-gray-700` / `--dt-gray-600` | Label / description text. |
+| `--dt-color-text-disabled` | Disabled label + description. |
+
+## Accessibility
+
+- Native `<input type="checkbox">` under the hood — full keyboard support (Tab to focus, Space to toggle), form integration, and screen-reader semantics for free.
+- `<label for>` association via the auto-generated `id` (override with the `id` prop).
+- `aria-checked="mixed"` is set when `indeterminate` is true.
+- Focus ring uses `:focus-visible` so it only appears on keyboard focus, not mouse clicks.
+- Click anywhere on the label (including the description) toggles the checkbox.
 
 ---
 
 <!-- slug: radio  ·  group: Form -->
 # DtRadio
 
-A radio button component with 3 sizes (lg/md/sm), animated selection dot, and label slot. Uses a hidden native `<input type="radio">` for accessibility. Group multiple radios with the same `name` prop.
+Radio button with three sizes, optional description text, and full keyboard/focus support. Wraps a visually-hidden `<input type="radio">` for native group behavior. Group multiple radios with the same `name` prop.
 
 ## Import
 
@@ -1040,28 +1107,33 @@ import { DtRadio } from '@/components/ui/radio'
 | ------ | ------ | --------- | ------------- |
 | `modelValue` | `string \| number` | — | Currently selected value in the group. Use with `v-model`. |
 | `value` | `string \| number` | **required** | This radio's value. |
-| `size` | `'lg' \| 'md' \| 'sm'` | `'md'` | Radio size. |
-| `disabled` | `boolean` | `false` | Disables the radio. |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Circle: 16 / 20 / 24 px. |
+| `disabled` | `boolean` | `false` | Native disabled state. |
 | `name` | `string` | — | Group name for native radio behavior. |
+| `label` | `string` | — | Inline label text. Default slot wins if both are provided. |
+| `description` | `string` | — | Secondary text rendered under the label. |
+| `id` | `string` | auto | HTML id for `<label for>` association. |
 
 ## Events
 
 | Event | Payload | Description |
 | ------- | --------- | ------------- |
-| `update:modelValue` | `string \| number` | Emitted when selected. |
+| `update:modelValue` | `string \| number` | Standard v-model. |
 
-## Sizes
+## Slots
 
-| Size | Circle | Inner Dot |
-| ------ | -------- | ----------- |
-| `lg` | 24x24px | 10px |
-| `md` | 20x20px | 8px |
-| `sm` | 16x16px | 6px |
+| Slot | Description |
+| ------ | ------------- |
+| `default` | Label content. Overrides the `label` prop. |
+| `description` | Description content. Overrides the `description` prop. |
 
 ## Usage
 
+### Basic group
+
 ```vue
 <script setup>
+import { ref } from 'vue'
 const plan = ref('free')
 </script>
 
@@ -1072,12 +1144,75 @@ const plan = ref('free')
 </template>
 ```
 
+### Label + description
+
+```vue
+<DtRadio
+  v-model="plan"
+  value="pro"
+  name="plan"
+  label="Pro"
+  description="All features, priority support, 30-day trial."
+/>
+```
+
+Or via slots:
+
+```vue
+<DtRadio v-model="plan" value="pro" name="plan">
+  Pro
+  <template #description>All features, priority support, 30-day trial.</template>
+</DtRadio>
+```
+
+### Sizes
+
+```vue
+<DtRadio size="sm" v-model="x" value="a" name="g">Small</DtRadio>
+<DtRadio size="md" v-model="x" value="b" name="g">Medium</DtRadio>
+<DtRadio size="lg" v-model="x" value="c" name="g">Large</DtRadio>
+```
+
+### Disabled
+
+```vue
+<DtRadio disabled value="x" name="g">Off</DtRadio>
+<DtRadio disabled v-model="model" value="x" name="g">On</DtRadio>
+```
+
 ## States
 
-- **Unselected**: `--dt-gray-200` background
-- **Hover**: `--dt-gray-300` background
-- **Selected**: `--dt-color-accent` background, white dot (animated pop)
-- **Disabled**: `--dt-gray-100` background, muted label
+| State | Visual |
+| ----- | ------ |
+| Default (unselected) | White bg + 1.5px `--dt-color-border-hover` outline |
+| Hover (unselected) | Outline → `--dt-color-accent-hover` |
+| Focus | Outer 2px `--dt-color-accent` ring at 5px offset |
+| Selected | bg + border `--dt-color-accent`, white dot (animated pop) |
+| Selected + hover | bg + border `--dt-color-accent-hover` |
+| Disabled (unselected) | bg `--dt-gray-200`, outline `--dt-color-border-hover` |
+| Disabled (selected) | bg + border `--dt-brand-200` |
+
+## CSS Custom Properties
+
+| Property | Usage |
+| ---------- | ------- |
+| `--dt-color-background` | Default unselected circle background. |
+| `--dt-color-border-hover` | Default outline color (gray-300). |
+| `--dt-color-accent` / `--dt-color-accent-hover` | Selected fill + hover. |
+| `--dt-brand-200` | Disabled-selected fill. |
+| `--dt-gray-200` | Disabled-unselected fill. |
+| `--dt-radius-full` | Circle radius. |
+| `--dt-color-white` | Inner dot. |
+| `--dt-gray-700` / `--dt-gray-600` | Label / description text. |
+| `--dt-color-text-disabled` | Disabled label + description. |
+
+## Accessibility
+
+- Native `<input type="radio">` under the hood — Tab to focus the group, Arrow keys to switch within it, native form integration.
+- `<label for>` association via the auto-generated `id` (override with `id`).
+- Focus ring uses `:focus-visible` so it only shows on keyboard focus, not mouse clicks.
+- Click anywhere on the label (including description) selects the radio.
+- Group multiple radios with the same `name` for native exclusive-selection behavior.
 
 ---
 
@@ -2821,5 +2956,309 @@ These remain visual layout helpers. Use heading and paragraph content in the hea
 ## Accessibility
 
 Reka UI provides `role="dialog"`, `aria-modal`, focus trapping, Escape key handling, outside click dismissal, body scroll lock through the overlay, and focus restoration to the trigger. For best screen-reader announcements, provide a clear heading in `DtDialogHeader`; future versions may expose dedicated `DtDialogTitle` and `DtDialogDescription` wrappers if teams need stricter title/description wiring.
+
+---
+
+<!-- slug: dropdown-menu  ·  group: Overlay -->
+# DtDropdownMenu
+
+A floating menu that opens from any trigger element. Includes items, separators, labels, groups, checkbox/radio items, and nested submenus. Built on Reka UI primitives so positioning, keyboard navigation (arrows, typeahead, Home/End, Esc), focus trapping, outside dismissal, portal rendering, and ARIA roles all come for free.
+
+## Dependency
+
+This component imports primitives from `reka-ui`. The `dt-ui` CLI installs `reka-ui@2.9.6` when you run:
+
+```bash
+npx dt-ui add dropdown-menu
+```
+
+## Import
+
+```ts
+import {
+  DtDropdownMenu,
+  DtDropdownMenuTrigger,
+  DtDropdownMenuContent,
+  DtDropdownMenuItem,
+  DtDropdownMenuSeparator,
+  DtDropdownMenuLabel,
+  DtDropdownMenuGroup,
+  DtDropdownMenuCheckboxItem,
+  DtDropdownMenuRadioGroup,
+  DtDropdownMenuRadioItem,
+  DtDropdownMenuSub,
+  DtDropdownMenuSubTrigger,
+  DtDropdownMenuSubContent,
+} from '@/components/ui/dropdown-menu'
+```
+
+## Usage
+
+### Basic
+
+```vue
+<script setup lang="ts">
+import {
+  DtDropdownMenu,
+  DtDropdownMenuTrigger,
+  DtDropdownMenuContent,
+  DtDropdownMenuItem,
+  DtDropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
+</script>
+
+<template>
+  <DtDropdownMenu>
+    <DtDropdownMenuTrigger label="Action" />
+
+    <DtDropdownMenuContent>
+      <DtDropdownMenuItem @select="copy">Copy</DtDropdownMenuItem>
+      <DtDropdownMenuItem @select="paste">Paste</DtDropdownMenuItem>
+      <DtDropdownMenuSeparator />
+      <DtDropdownMenuItem destructive @select="remove">Delete</DtDropdownMenuItem>
+    </DtDropdownMenuContent>
+  </DtDropdownMenu>
+</template>
+```
+
+### Icon-only trigger
+
+```vue
+<DtDropdownMenu>
+  <DtDropdownMenuTrigger icon-only />
+  <DtDropdownMenuContent align="end">
+    <DtDropdownMenuItem>Edit</DtDropdownMenuItem>
+    <DtDropdownMenuItem>Duplicate</DtDropdownMenuItem>
+    <DtDropdownMenuSeparator />
+    <DtDropdownMenuItem destructive>Delete</DtDropdownMenuItem>
+  </DtDropdownMenuContent>
+</DtDropdownMenu>
+```
+
+The default icon is a vertical three-dot glyph; pass any 16px SVG via the default slot to override.
+
+### Custom trigger (BYO)
+
+For full control, set `as-child` and slot your own element. `as-child` defers all styling and chevron rendering to your element.
+
+```vue
+<DtDropdownMenuTrigger as-child>
+  <DtButton variant="outline">Open menu</DtButton>
+</DtDropdownMenuTrigger>
+```
+
+### Items with leading icon
+
+```vue
+<DtDropdownMenuItem>
+  <template #leading>
+    <IconUser />
+  </template>
+  Profile
+</DtDropdownMenuItem>
+```
+
+### Group + label
+
+```vue
+<DtDropdownMenuLabel>Account</DtDropdownMenuLabel>
+<DtDropdownMenuGroup>
+  <DtDropdownMenuItem>Profile</DtDropdownMenuItem>
+  <DtDropdownMenuItem>Billing</DtDropdownMenuItem>
+  <DtDropdownMenuItem>Settings</DtDropdownMenuItem>
+</DtDropdownMenuGroup>
+```
+
+### Checkbox items
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+const showStatusBar = ref(true)
+const showFullPath  = ref(false)
+</script>
+
+<template>
+  <DtDropdownMenuCheckboxItem v-model="showStatusBar">Show status bar</DtDropdownMenuCheckboxItem>
+  <DtDropdownMenuCheckboxItem v-model="showFullPath">Show full path</DtDropdownMenuCheckboxItem>
+</template>
+```
+
+### Radio group
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+const position = ref('bottom')
+</script>
+
+<template>
+  <DtDropdownMenuRadioGroup v-model="position">
+    <DtDropdownMenuRadioItem value="top">Top</DtDropdownMenuRadioItem>
+    <DtDropdownMenuRadioItem value="right">Right</DtDropdownMenuRadioItem>
+    <DtDropdownMenuRadioItem value="bottom">Bottom</DtDropdownMenuRadioItem>
+  </DtDropdownMenuRadioGroup>
+</template>
+```
+
+### Nested submenu
+
+```vue
+<DtDropdownMenuSub>
+  <DtDropdownMenuSubTrigger>Share</DtDropdownMenuSubTrigger>
+  <DtDropdownMenuSubContent>
+    <DtDropdownMenuItem>Copy link</DtDropdownMenuItem>
+    <DtDropdownMenuItem>Email</DtDropdownMenuItem>
+    <DtDropdownMenuItem>Twitter</DtDropdownMenuItem>
+  </DtDropdownMenuSubContent>
+</DtDropdownMenuSub>
+```
+
+## DtDropdownMenu Props
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `modelValue` | `boolean` | `undefined` | Controlled open state. Use with `v-model`. |
+| `defaultOpen` | `boolean` | `false` | Initial uncontrolled open state. |
+| `modal` | `boolean` | `true` | Whether outside content is inert while open. |
+
+### Slot props
+
+The default slot receives helpers for programmatic control.
+
+| Slot Prop | Type | Description |
+| ----------- | ------ | ------------- |
+| `open` | `boolean` | Current open state. |
+| `toggle` | `() => void` | Toggles the menu. |
+| `close` | `() => void` | Closes the menu. |
+| `openMenu` | `() => void` | Opens the menu. |
+
+## DtDropdownMenuTrigger
+
+Renders an opinionated button trigger by default — white surface, gray-200 border, `--dt-shadow-xs`, `--dt-radius-sm` (8px), trailing chevron-down that rotates 180° when the menu is open. Pass `icon-only` for a square icon trigger (default glyph: vertical three dots). For full BYO, set `as-child` and slot your own element.
+
+The default-slot content (or `label` prop) becomes the visible text in button mode; in `icon-only` mode the default slot becomes the icon (override the three-dot default with any 16px SVG).
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `asChild` | `boolean` | `false` | Render the slotted element as the trigger. All built-in styling is skipped. |
+| `iconOnly` | `boolean` | `false` | Render a square icon-only trigger. Default glyph is a vertical three-dot. |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Button: 32 / 36 / 40 px. Icon: 24 / 32 / 40 px square. |
+| `disabled` | `boolean` | `false` | Disabled state. |
+| `label` | `string` | — | Convenience label for button mode. Default slot wins. |
+
+| Slot | Description |
+| ------ | ------------- |
+| `default` | Button mode: label text or rich label content. Icon mode: 16px icon override. |
+| `leading` | Button mode only — leading 16px icon. |
+
+## DtDropdownMenuContent
+
+Renders inside a `DropdownMenuPortal` with DT styling — white surface, 1px border, `--dt-radius-sm` (8px), `--dt-shadow-lg`, default min-width 13.5rem (216px). Animated via Reka's `data-state` attributes.
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `side` | `'top' \| 'right' \| 'bottom' \| 'left'` | `'bottom'` | Preferred side relative to the trigger. |
+| `sideOffset` | `number` | `6` | Distance in px between the trigger and the menu. |
+| `align` | `'start' \| 'center' \| 'end'` | `'start'` | Alignment along the trigger edge. |
+| `alignOffset` | `number` | `0` | Offset along the alignment axis. |
+| `avoidCollisions` | `boolean` | `true` | Flip / shift to stay inside the viewport. |
+| `minWidth` | `string` | `'13.5rem'` | Minimum panel width. |
+
+## DtDropdownMenuItem
+
+A single action row. Default slot is the label; `leading` and `trailing` slots accept 16px icons. Set `destructive` to render the row in the error color (used for "Delete", "Remove", etc.).
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `disabled` | `boolean` | `false` | Skipped by keyboard navigation and not selectable. |
+| `destructive` | `boolean` | `false` | Renders in error red. |
+| `textValue` | `string` | — | Override the string used for typeahead matching. Defaults to the trimmed text content. |
+
+| Event | Payload | Description |
+| ------- | --------- | ------------- |
+| `select` | `Event` | Fired on click or Enter/Space. Call `event.preventDefault()` to keep the menu open. |
+
+## DtDropdownMenuSeparator
+
+A 1px hairline divider with 4px vertical breathing room. No props.
+
+## DtDropdownMenuLabel
+
+Non-interactive section heading. Uppercase, body-xs, gray-500. Use it above a `DtDropdownMenuGroup` to label a cluster of related items.
+
+## DtDropdownMenuGroup
+
+Wraps a logical cluster of items for assistive tech (`role="group"`). Purely semantic — no visual styling on its own.
+
+## DtDropdownMenuCheckboxItem
+
+Toggleable item with a check / dash indicator.
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `modelValue` | `boolean \| 'indeterminate'` | `false` | Checked state. Use with `v-model`. |
+| `disabled` | `boolean` | `false` | Disabled state. |
+| `textValue` | `string` | — | Typeahead override. |
+
+| Event | Payload | Description |
+| ------- | --------- | ------------- |
+| `update:modelValue` | `boolean \| 'indeterminate'` | Standard v-model. |
+| `select` | `Event` | Fired on selection. Call `event.preventDefault()` to keep the menu open. |
+
+## DtDropdownMenuRadioGroup
+
+Container that coordinates a set of `DtDropdownMenuRadioItem`s via shared `modelValue`.
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `modelValue` | `string` | — | Currently selected value. Use with `v-model`. |
+
+## DtDropdownMenuRadioItem
+
+A single radio option inside a `DtDropdownMenuRadioGroup`.
+
+| Prop | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `value` | `string` | **required** | This option's value. |
+| `disabled` | `boolean` | `false` | Disabled state. |
+| `textValue` | `string` | — | Typeahead override. |
+
+## DtDropdownMenuSub / DtDropdownMenuSubTrigger / DtDropdownMenuSubContent
+
+A nested submenu. `Sub` is the controller, `SubTrigger` opens it (renders a trailing chevron-right automatically), `SubContent` is the floating panel.
+
+```vue
+<DtDropdownMenuSub>
+  <DtDropdownMenuSubTrigger>More options</DtDropdownMenuSubTrigger>
+  <DtDropdownMenuSubContent>
+    <DtDropdownMenuItem>Rename</DtDropdownMenuItem>
+    <DtDropdownMenuItem>Duplicate</DtDropdownMenuItem>
+  </DtDropdownMenuSubContent>
+</DtDropdownMenuSub>
+```
+
+| Prop on `Sub` | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `modelValue` | `boolean` | `undefined` | Controlled open state for the submenu. |
+| `defaultOpen` | `boolean` | `false` | Initial uncontrolled open state. |
+
+| Prop on `SubTrigger` | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `disabled` | `boolean` | `false` | Disabled state. |
+| `textValue` | `string` | — | Typeahead override. |
+
+| Prop on `SubContent` | Type | Default | Description |
+| ------ | ------ | --------- | ------------- |
+| `sideOffset` | `number` | `6` | Distance from the trigger. |
+| `alignOffset` | `number` | `-4` | Cross-axis offset so the panel lines up with the row. |
+| `minWidth` | `string` | `'13.5rem'` | Minimum panel width. |
+
+## Accessibility
+
+- Roles applied automatically: `menu`, `menuitem`, `menuitemcheckbox`, `menuitemradio`, `group`.
+- Keyboard: Enter / Space to activate, ArrowUp / ArrowDown to move, Home / End to jump, typeahead to focus by first letter, ArrowRight / ArrowLeft to enter / leave submenus, Esc to close.
+- Focus returns to the trigger when the menu closes.
+- Disabled items are skipped by keyboard navigation and typeahead.
 
 ---

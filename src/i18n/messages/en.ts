@@ -37,6 +37,7 @@ export default {
     searchToolbar: 'Search Toolbar',
     layout: 'Layout',
     dialog: 'Dialog',
+    dropdownMenu: 'Dropdown Menu',
   },
   search: {
     groups: {
@@ -76,6 +77,7 @@ export default {
       searchToolbar: 'Search input with optional action button.',
       layout: 'App shell — DtLayout, Header, Sidebar, ModulesModal, ProfileModal, PageView, Divider.',
       dialog: 'Modal dialog with overlay, focus trap, Escape close.',
+      dropdownMenu: 'Floating menu with items, separators, labels, checkbox/radio items, and nested submenus.',
     },
   },
   common: {
@@ -222,5 +224,6 @@ export default {
     tabSwitcher: { lead: 'A horizontal pill tab switcher with animated indicator. Optional per-tab badges.' },
     searchToolbar: { lead: 'A search input paired with an optional primary action button on the right.' },
     dialog: { lead: 'A modal dialog built on Reka UI. Composable parts for trigger / content / header / footer.' },
+    dropdownMenu: { lead: 'A floating menu built on Reka UI. Composable parts for trigger, content, items, separators, labels, groups, checkbox/radio items, and nested submenus.' },
   },
 }
