@@ -47,6 +47,7 @@ const openModules = (event: MouseEvent) => {
     showModulesModal.value = true
   }
 }
+
 </script>
 
 <template>
@@ -199,6 +200,22 @@ const openModules = (event: MouseEvent) => {
 @media (max-width: 1024px) {
   .dt-header {
     height: var(--dt-header-height-mobile);
+    padding: 0 var(--dt-spacing-xl);
+  }
+
+  .dt-header__action-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .dt-header__action-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .dt-header__avatar {
+    width: 32px;
+    height: 32px;
   }
 }
 </style>

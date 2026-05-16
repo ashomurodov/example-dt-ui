@@ -1,4 +1,28 @@
 <script lang="ts" setup>
+import { ref, provide, type Ref } from 'vue'
+
+export type DtSidebarMobileMode = 'drawer' | 'bottom'
+
+export interface DtLayoutSidebarContext {
+  drawerOpen: Ref<boolean>
+  mobileMode: Ref<DtSidebarMobileMode>
+  registerMobileMode: (mode: DtSidebarMobileMode) => void
+  toggleDrawer: () => void
+  openDrawer: () => void
+  closeDrawer: () => void
+}
+
+const drawerOpen = ref(false)
+const mobileMode = ref<DtSidebarMobileMode>('drawer')
+
+provide('dt-layout-sidebar', {
+  drawerOpen,
+  mobileMode,
+  registerMobileMode: (mode: DtSidebarMobileMode) => { mobileMode.value = mode },
+  toggleDrawer: () => { drawerOpen.value = !drawerOpen.value },
+  openDrawer: () => { drawerOpen.value = true },
+  closeDrawer: () => { drawerOpen.value = false },
+} satisfies DtLayoutSidebarContext)
 </script>
 
 <template>
@@ -47,6 +71,7 @@
   grid-area: content;
   min-width: 0;
   overflow: hidden;
+  padding: var(--dt-spacing-3xl);
 }
 
 @media (max-width: 1024px) {
@@ -55,16 +80,13 @@
     grid-auto-columns: 1fr;
   }
 
+  /* Sidebar self-positions on mobile (drawer or bottom-nav) */
   .dt-layout__sidebar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 40;
+    display: contents;
   }
 
   .dt-layout__content {
-    padding-bottom: var(--dt-mobile-nav-height);
+    padding: var(--dt-spacing-lg);
   }
 }
 </style>
