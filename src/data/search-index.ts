@@ -25,6 +25,7 @@ const seeds: SearchSeed[] = [
   { titleKey: 'nav.introduction',   descKey: 'search.descriptions.introduction',   group: 'Docs',         to: '/docs/getting-started',   keywords: 'install setup first component init add introduction quickstart' },
   { titleKey: 'nav.cli',            descKey: 'search.descriptions.cli',            group: 'Docs',         to: '/docs/cli',               keywords: 'init add update list commands' },
   { titleKey: 'nav.theming',        descKey: 'search.descriptions.theming',        group: 'Docs',         to: '/docs/theming',           keywords: 'color tokens dark mode css variables override scale brand' },
+  { titleKey: 'nav.dtHeader',       descKey: 'search.descriptions.dtHeader',       group: 'Docs',         to: '/docs/dt-header',         keywords: 'cdn header dt-header ecosystem platform shell modules profile loadDtHeader script' },
   // Form
   { titleKey: 'nav.button',         descKey: 'search.descriptions.button',         group: 'Form',         to: '/components/button',      keywords: 'click action submit primary secondary outline ghost loading' },
   { titleKey: 'nav.input',          descKey: 'search.descriptions.input',          group: 'Form',         to: '/components/input',       keywords: 'text field form label hint error success' },

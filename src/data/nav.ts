@@ -17,6 +17,7 @@ export function useSidebarNav() {
         { key: 'getting-started', to: '/docs/getting-started', label: t('nav.introduction') },
         { key: 'cli', to: '/docs/cli', label: t('nav.cli') },
         { key: 'theming', to: '/docs/theming', label: t('nav.theming') },
+        { key: 'dt-header', to: '/docs/dt-header', label: t('nav.dtHeader') },
       ],
     },
     {

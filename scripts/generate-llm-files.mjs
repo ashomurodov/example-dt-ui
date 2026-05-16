@@ -31,6 +31,7 @@ const DOC_PAGES = [
   { slug: 'getting-started', title: 'Getting Started', source: 'getting-started.md', route: '/docs/getting-started' },
   { slug: 'cli', title: 'CLI Reference', source: 'cli.md', route: '/docs/cli' },
   { slug: 'theming', title: 'Theming & Tokens', source: 'theming.md', route: '/docs/theming' },
+  { slug: 'dt-header', title: 'dt-header CDN', source: 'dt-header.md', route: '/docs/dt-header' },
   { slug: 'demo', title: 'Live Demo', source: 'demo.md', route: '/demo' },
 ]
 

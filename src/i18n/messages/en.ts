@@ -20,6 +20,7 @@ export default {
     introduction: 'Introduction',
     cli: 'CLI Reference',
     theming: 'Theming & Tokens',
+    dtHeader: 'dt-header CDN',
     button: 'Button',
     input: 'Input',
     select: 'Select',
@@ -60,6 +61,7 @@ export default {
       introduction: 'Install the package, init the registry, add components.',
       cli: 'Every command: init, add, update, list.',
       theming: 'Token system, raw scales vs semantic, dark mode, overrides.',
+      dtHeader: 'Drop-in CDN header for DT cabinets — modules switcher, profile, theme, account switching.',
       button: 'Four variants, five sizes, loading + disabled states.',
       input: 'Text input with label, hint, error, success states.',
       select: 'Custom dropdown with keyboard nav, typeahead, ARIA.',
@@ -157,6 +159,10 @@ export default {
     cli: {
       title: 'CLI Reference',
       lead: 'The <code>dt-ui</code> CLI is the only thing you actually install as a dependency. It runs four commands.',
+    },
+    dtHeader: {
+      title: 'dt-header CDN',
+      lead: 'A drop-in script-tag header for DT ecosystem cabinets. Provides the modules switcher, profile modal, account switching, language picker, and optional theme picker — all wired to the DT identity service. Cabinets stop hand-rolling these and let the CDN handle them.',
     },
     theming: {
       title: 'Theming & Tokens',

@@ -20,6 +20,7 @@ export default {
     introduction: 'Kirish',
     cli: 'CLI qo‘llanma',
     theming: 'Tema va tokenlar',
+    dtHeader: 'dt-header CDN',
     button: 'Tugma',
     input: 'Kiritish maydoni',
     select: 'Tanlash ro‘yxati',
@@ -60,6 +61,7 @@ export default {
       introduction: 'Paketni o‘rnatish, registry init, komponent qo‘shish.',
       cli: 'Barcha buyruqlar: init, add, update, list.',
       theming: 'Tokenlar tizimi, xom va semantik shkalalar, qorong‘i tema, qayta belgilash.',
+      dtHeader: 'DT kabinetlari uchun CDN-header: modullar, profil, tema, hisob almashtirish.',
       button: 'To‘rt variant, besh o‘lcham, loading va disabled holatlari.',
       input: 'Label, hint, error, success holatlari bilan kiritish maydoni.',
       select: 'Klaviatura, typeahead, ARIA bilan maxsus tanlash ro‘yxati.',
@@ -157,6 +159,10 @@ export default {
     cli: {
       title: 'CLI qo‘llanma',
       lead: '<code>dt-ui</code> CLI — bu yagona haqiqiy dependency. Faqat to‘rtta buyruq.',
+    },
+    dtHeader: {
+      title: 'dt-header CDN',
+      lead: 'DT ekotizimi kabinetlari uchun script-tag orqali ulanadigan tayyor header. Modullar tanlash, profil modali, hisob almashtirish, til tanlash va ixtiyoriy tema tanlash — barchasi DT identity xizmatiga ulangan. Kabinetlar bularni qo‘ldan yozishni to‘xtatib, CDN’ga ishonadi.',
     },
     theming: {
       title: 'Tema va tokenlar',

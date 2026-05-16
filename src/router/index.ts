@@ -8,6 +8,7 @@ const routes: RouteRecordRaw[] = [
   { path: '/docs/getting-started', name: 'getting-started', component: () => import('@/views/docs/GettingStartedView.vue') },
   { path: '/docs/cli', name: 'cli', component: () => import('@/views/docs/CliView.vue') },
   { path: '/docs/theming', name: 'theming', component: () => import('@/views/docs/ThemingView.vue') },
+  { path: '/docs/dt-header', name: 'dt-header', component: () => import('@/views/docs/DtHeaderView.vue') },
 
   // Components — Form
   { path: '/components/button', name: 'button', component: () => import('@/views/components/ButtonView.vue') },
