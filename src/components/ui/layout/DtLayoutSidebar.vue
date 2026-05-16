@@ -807,34 +807,41 @@ const DtSidebarItem = defineComponent({
   overflow: hidden;
 }
 
-/* Floating open trigger (mobile only, drawer mode, drawer closed) */
+/* Floating open trigger (mobile only, drawer mode, drawer closed).
+   Brand-colored tab stuck to the left wall, centered in the bottom half. */
 .dt-sidebar-trigger {
   display: none;
   position: fixed;
-  top: var(--dt-header-height-mobile);
+  top: 75%;
   left: 0;
+  transform: translateY(-50%);
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 35px;
+  height: 30px;
   padding: 0;
   border: 0;
-  background: transparent;
-  color: var(--dt-color-icon-dark);
+  border-radius: 0 var(--dt-radius-sm) var(--dt-radius-sm) 0;
+  background: var(--dt-color-accent);
+  color: var(--dt-color-white);
   cursor: pointer;
   z-index: 35;
-  transition: background-color var(--dt-transition-fast);
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.08);
+  opacity: 0.6;
+  transition: background-color var(--dt-transition-fast),
+    opacity var(--dt-transition-fast);
 }
 
 .dt-sidebar-trigger:hover,
 .dt-sidebar-trigger:focus-visible {
-  background: var(--dt-color-background-secondary);
+  background: var(--dt-color-accent-hover);
+  opacity: 1;
   outline: none;
 }
 
 .dt-sidebar-trigger svg {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
 }
 
 @media (max-width: 1024px) {
@@ -843,38 +850,43 @@ const DtSidebarItem = defineComponent({
   }
 }
 
-/* Drawer close button (rendered only inside .dt-sidebar--drawer, vertically aligned with first nav item) */
+/* Drawer close button — mirrors the open trigger: white tab sticking out from
+   the right edge of the drawer at the same vertical position. Hidden when
+   drawer is closed (fades out with the slide). */
 .dt-sidebar__close {
   display: none;
   position: absolute;
-  /* Drawer padding-top (16px) + half of (link height 40 − button height 32) = 20px → centers on first nav item */
-  top: var(--dt-spacing-2xl);
-  right: var(--dt-spacing-lg);
-  width: 32px;
-  height: 32px;
+  top: 75%;
+  right: -35px;
+  transform: translateY(-50%);
   align-items: center;
   justify-content: center;
+  width: 35px;
+  height: 30px;
   padding: 0;
-  border: 1px solid var(--dt-color-border);
-  border-radius: var(--dt-radius-sm);
+  border: 0;
+  border-radius: 0 var(--dt-radius-sm) var(--dt-radius-sm) 0;
   background: var(--dt-color-background);
-  color: var(--dt-color-icon-dark);
+  color: var(--dt-color-accent);
   cursor: pointer;
-  z-index: 1;
+  z-index: 35;
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.08);
+  opacity: 0;
+  visibility: hidden;
   transition: background-color var(--dt-transition-fast),
-    border-color var(--dt-transition-fast);
+    opacity var(--dt-transition-base),
+    visibility 0s linear var(--dt-transition-base);
 }
 
 .dt-sidebar__close:hover,
 .dt-sidebar__close:focus-visible {
   background: var(--dt-color-background-secondary);
-  border-color: var(--dt-color-border-hover);
   outline: none;
 }
 
 .dt-sidebar__close svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 
 /* Backdrop (drawer mode only) */
@@ -917,7 +929,9 @@ const DtSidebarItem = defineComponent({
     border-right: 1px solid var(--dt-color-border-light);
     transform: translateX(-100%);
     transition: transform var(--dt-transition-base);
-    overflow: hidden;
+    /* visible so the close button can poke out to the right; the inner nav
+       handles its own vertical scrolling */
+    overflow: visible;
     display: flex;
     flex-direction: column;
   }
@@ -941,6 +955,16 @@ const DtSidebarItem = defineComponent({
 
   .dt-sidebar--drawer .dt-sidebar__close {
     display: inline-flex;
+  }
+
+  /* Fade in only when drawer is open — keeps it hidden when the drawer is
+     translated off-screen (it would otherwise be visible at the left edge
+     because position-absolute children translate with the parent). */
+  .dt-sidebar--drawer.dt-sidebar--drawer-open .dt-sidebar__close {
+    opacity: 1;
+    visibility: visible;
+    transition: background-color var(--dt-transition-fast),
+      opacity var(--dt-transition-base);
   }
 
   /* Bottom mode (opt-in): horizontal bar at bottom */

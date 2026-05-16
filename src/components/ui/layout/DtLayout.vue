@@ -59,7 +59,9 @@ provide('dt-layout-sidebar', {
 .dt-layout__main {
   display: grid;
   grid-template-areas: 'sidebar content';
-  grid-auto-columns: minmax(var(--dt-sidebar-width, 240px), auto) 1fr;
+  /* Fixed sidebar column so wide #top slot content doesn't grow the column
+     (consumers can override --dt-sidebar-width). Content area gets the rest. */
+  grid-template-columns: var(--dt-sidebar-width, 240px) 1fr;
 }
 
 .dt-layout__sidebar {
@@ -71,13 +73,12 @@ provide('dt-layout-sidebar', {
   grid-area: content;
   min-width: 0;
   overflow: hidden;
-  padding: var(--dt-spacing-3xl);
 }
 
 @media (max-width: 1024px) {
   .dt-layout__main {
     grid-template-areas: 'content';
-    grid-auto-columns: 1fr;
+    grid-template-columns: 1fr;
   }
 
   /* Sidebar self-positions on mobile (drawer or bottom-nav) */
@@ -85,8 +86,9 @@ provide('dt-layout-sidebar', {
     display: contents;
   }
 
+  /* Edge gutter on mobile so router-view doesn't sit flush against the wall */
   .dt-layout__content {
-    padding: var(--dt-spacing-lg);
+    padding: 0 var(--dt-spacing-lg);
   }
 }
 </style>
