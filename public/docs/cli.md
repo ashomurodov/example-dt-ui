@@ -9,7 +9,7 @@ The `dt-ui` CLI is a thin script around the registry. Every command is determini
 | `npx dt-ui init` | Initialize the registry in the current project. Writes `.dtui.json`, copies `base.css` and `lib/utils.ts`, creates `AGENT.md`. |
 | `npx dt-ui list` | List every component in the registry with installed status. |
 | `npx dt-ui add <name…>` | Copy one or more components into `src/components/ui/`. Resolves internal deps and installs npm peer deps. |
-| `npx dt-ui update` | Refresh shared files (`base.css`, `lib/utils.ts`, `AGENT.md`). Optionally re-copies installed components — confirms before overwriting. |
+| `npx dt-ui update` | Bumps `aetherx-dt-ui` to latest, refreshes shared files (`base.css`, `lib/utils.ts`, `AGENT.md`), and prompts to re-copy installed components that drifted. One command does it all. |
 
 ## init
 
@@ -37,10 +37,15 @@ If a component declares an internal dep (e.g. `dialog` needs `button`), the CLI 
 
 ## update
 
-Use after upgrading `aetherx-dt-ui`. Updates the shared style file, the helper utilities, and the agent reference. Optionally re-copies installed components, but **always asks first** — local edits are sacred.
+One command, one flow: bumps `aetherx-dt-ui` to latest using your detected package manager (npm / pnpm / yarn / bun), then refreshes `base.css`, `lib/utils.ts`, and `AGENT.md`, then offers an interactive multi-select of any installed components whose files have drifted. **Always asks before overwriting** — local edits are sacred.
 
 ```bash
+# Single command — installs aetherx-dt-ui@latest, refreshes shared files,
+# then prompts for components to re-copy.
 npx dt-ui update
+
+# Skip the install step if you've pinned to a specific version.
+npx dt-ui update --no-install
 ```
 
 ## Config file
