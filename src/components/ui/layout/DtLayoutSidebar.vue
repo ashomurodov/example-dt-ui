@@ -535,15 +535,18 @@ const DtSidebarItem = defineComponent({
   --dt-sidebar-tree-tail-trim: 6px;
   --dt-sidebar-sub-item-height: 32px;
 
-  width: var(--dt-sidebar-width);
-  max-width: var(--dt-sidebar-width);
+  /* Wider than the grid cell so the negative left margin can bleed past the
+     aside's left edge while the right edge still lands flush at 240px.
+     Items + own internal padding give the text its visual breathing room. */
+  width: calc(var(--dt-sidebar-width) + var(--dt-spacing-xl));
+  max-width: calc(var(--dt-sidebar-width) + var(--dt-spacing-xl));
   background-color: var(--dt-color-background);
   position: sticky;
   top: var(--dt-header-height);
   align-self: start;
   padding-left: var(--dt-spacing-3xl);
   padding-bottom: var(--dt-spacing-3xl);
-  margin: 0 calc(var(--dt-spacing-xl) * -1);
+  margin-left: calc(var(--dt-spacing-xl) * -1);
   max-height: calc(100vh - var(--dt-header-height));
   overflow-x: hidden;
   overflow-y: auto;
@@ -822,19 +825,17 @@ const DtSidebarItem = defineComponent({
   padding: 0;
   border: 0;
   border-radius: 0 var(--dt-radius-lg) var(--dt-radius-lg) 0;
-  background: var(--dt-color-accent);
+  background: #3f4c5d;
   color: var(--dt-color-white);
   cursor: pointer;
   z-index: 35;
   box-shadow: 0 2px 8px rgba(16, 24, 40, 0.08);
-  opacity: 0.6;
-  transition: background-color var(--dt-transition-fast),
-    opacity var(--dt-transition-fast);
+  opacity: 0.9;
+  transition: opacity var(--dt-transition-fast);
 }
 
 .dt-sidebar-trigger:hover,
 .dt-sidebar-trigger:focus-visible {
-  background: var(--dt-color-accent-hover);
   opacity: 1;
   outline: none;
 }
