@@ -108,6 +108,13 @@ const demoUser: DtUser = {
 const profileLog = ref('— modal closed')
 const onLogout = () => { profileLog.value = 'logout() fired'; showProfileDemo.value = false }
 
+// Demo data for the #switch-account slot (static — real apps fetch the account list).
+const demoAccounts = [
+  { id: '1', name: 'DT Hub', sub: 'TIN: 305 123 456', initials: 'DH', active: true },
+  { id: '2', name: 'Mardon Shonazarov', sub: 'Individual', initials: 'MS', active: false },
+  { id: '3', name: 'Acme Inc.', sub: 'TIN: 301 998 877', initials: 'AI', active: false },
+]
+
 function onThemeChange(value: ThemeMode) {
   setTheme(value)
   profileLog.value = `theme-change: ${value} (applied to docs site)`
@@ -280,7 +287,13 @@ function onLogout() {
         v-model="showProfile"
         :user="user"
         @logout="onLogout"
-      />
+        @open-switch-account="loadAccounts"
+      >
+        <!-- Optional: adds a "Switch account" item + in-popover sub-view -->
+        <template #switch-account="{ close }">
+          <AccountList @switched="close" />
+        </template>
+      </DtProfileModal>
     </template>
   </DtLayoutHeader>
 </template>`
@@ -294,7 +307,7 @@ const componentsRows = [
   { name: 'DtLayoutHeader', desc: 'Sticky top bar with logo slot, badge, profile button, and built-in modules switcher.' },
   { name: 'DtLayoutSidebar', desc: 'Vertical nav with sections, expandable items, badges, and mobile bottom-nav.' },
   { name: 'DtModulesModal', desc: 'Modal triggered by header — switches between products in the ecosystem.' },
-  { name: 'DtProfileModal', desc: 'Profile dropdown with user info, theme/locale switchers, and logout.' },
+  { name: 'DtProfileModal', desc: 'Profile dropdown with user info, theme/locale switchers, logout, and an optional #switch-account slot (adds a Switch-account sub-view).' },
   { name: 'DtPageView', desc: 'Page-level container. Title slot, max-width prop, consistent padding.' },
   { name: 'DtDivider', desc: 'Horizontal 1px line. Configurable spacing prop.' },
 ]
@@ -402,7 +415,25 @@ const navItemRows = [
               @logout="onLogout"
               @theme-change="onThemeChange"
               @locale-change="onLocaleChange"
-            />
+            >
+              <template #switch-account>
+                <ul class="dx-switch-demo">
+                  <li
+                    v-for="acc in demoAccounts"
+                    :key="acc.id"
+                    class="dx-switch-demo__item"
+                    :class="{ 'dx-switch-demo__item--active': acc.active }"
+                  >
+                    <span class="dx-switch-demo__avatar">{{ acc.initials }}</span>
+                    <span class="dx-switch-demo__info">
+                      <span class="dx-switch-demo__name">{{ acc.name }}</span>
+                      <span class="dx-switch-demo__sub">{{ acc.sub }}</span>
+                    </span>
+                    <span v-if="acc.active" class="dx-switch-demo__badge">Current</span>
+                  </li>
+                </ul>
+              </template>
+            </DtProfileModal>
           </template>
         </DtLayoutHeader>
         <code class="dx-header-demo__log">Last emit: {{ profileLog }}</code>
@@ -572,5 +603,74 @@ const navItemRows = [
   margin-top: var(--dt-spacing-md);
   font-size: var(--dt-text-body-sm);
   color: var(--dt-color-text-secondary);
+}
+
+/* Demo content for the #switch-account slot */
+.dx-switch-demo {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dx-switch-demo__item {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacing-md);
+  padding: var(--dt-spacing-md);
+  border-radius: var(--dt-radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background var(--dt-transition-fast);
+}
+
+.dx-switch-demo__item:hover {
+  background: var(--dt-color-background-tertiary);
+}
+
+.dx-switch-demo__item--active {
+  border-color: var(--dt-color-accent);
+  background: var(--dt-color-background-tertiary);
+}
+
+.dx-switch-demo__avatar {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--dt-color-background-tertiary);
+  color: var(--dt-color-text);
+  font-size: var(--dt-text-body-sm);
+  font-weight: 600;
+}
+
+.dx-switch-demo__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dx-switch-demo__name {
+  font-size: var(--dt-text-body-sm);
+  font-weight: 500;
+  color: var(--dt-color-text);
+}
+
+.dx-switch-demo__sub {
+  font-size: var(--dt-text-body-xs);
+  color: var(--dt-color-text-secondary);
+}
+
+.dx-switch-demo__badge {
+  flex: 0 0 auto;
+  font-size: var(--dt-text-body-xs);
+  font-weight: 500;
+  color: var(--dt-color-accent);
 }
 </style>
